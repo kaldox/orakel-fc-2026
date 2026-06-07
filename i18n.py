@@ -271,6 +271,7 @@ TR_EN = {
     "z.B. Joker „Sabotage“ gegen Tom": "e.g. joker “sabotage” against Tom",
     "Buchen": "Book",
     "Noch keine Anpassungen.": "No adjustments yet.",
+    "Anpassung löschen?": "Delete adjustment?",
 
     # --- Admin: Missionen zuweisen ---
     "Geheime Missionen zuweisen": "Assign secret missions",
