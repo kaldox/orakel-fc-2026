@@ -7,6 +7,8 @@ Challenges, Sonderwertungen, Chaos-Events) sind ueber den Admin-Bereich
 frei erweiterbar - einfach neue Eintraege im Browser anlegen.
 """
 import os
+import time
+import threading
 from datetime import datetime
 from functools import wraps
 from math import floor
@@ -14,6 +16,7 @@ from math import floor
 from flask import (Flask, render_template, request, redirect, url_for,
                    session, flash, abort)
 from flask_sqlalchemy import SQLAlchemy
+from flask_wtf.csrf import CSRFProtect, CSRFError
 from werkzeug.security import generate_password_hash, check_password_hash
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -32,7 +35,38 @@ app.config["SESSION_COOKIE_SECURE"] = os.environ.get("COOKIE_SECURE", "0") == "1
 LEAGUE_NAME = os.environ.get("LEAGUE_NAME", "ORAKEL FC 2026")
 
 db = SQLAlchemy(app)
+csrf = CSRFProtect(app)
 sign = lambda x: (x > 0) - (x < 0)
+
+# --- Schutz gegen Passwort-Rateversuche (in-memory, pro Benutzername) ---
+_login_lock = threading.Lock()
+_login_fails = {}            # name (lowercase) -> Liste mit Fehlversuch-Zeitstempeln
+LOGIN_WINDOW = 900           # Beobachtungsfenster in Sekunden (15 min)
+LOGIN_MAX = 8                # so viele Fehlversuche -> kurze Sperre
+
+
+def _bf_locked(name):
+    now = time.time()
+    with _login_lock:
+        fails = [t for t in _login_fails.get(name.lower(), []) if now - t < LOGIN_WINDOW]
+        _login_fails[name.lower()] = fails
+        return len(fails) >= LOGIN_MAX
+
+
+def _bf_record(name):
+    with _login_lock:
+        _login_fails.setdefault(name.lower(), []).append(time.time())
+
+
+def _bf_clear(name):
+    with _login_lock:
+        _login_fails.pop(name.lower(), None)
+
+
+@app.errorhandler(CSRFError)
+def _handle_csrf(e):
+    flash("Deine Sitzung ist abgelaufen. Bitte lade die Seite neu und versuch es erneut.", "error")
+    return redirect(request.referrer or url_for("login"))
 
 
 class Player(db.Model):
@@ -317,10 +351,16 @@ def login():
     if request.method == "POST":
         name = request.form.get("name", "").strip()
         pw = request.form.get("password", "")
+        if name and _bf_locked(name):
+            flash("Zu viele Fehlversuche. Bitte warte ein paar Minuten und versuch es erneut.", "error")
+            return render_template("login.html")
         p = Player.query.filter_by(name=name).first()
         if p and check_password_hash(p.pw_hash, pw):
+            _bf_clear(name)
             session["pid"] = p.id
             return redirect(request.args.get("next") or url_for("dashboard"))
+        if name:
+            _bf_record(name)
         flash("Name oder Passwort stimmt nicht.", "error")
     return render_template("login.html")
 

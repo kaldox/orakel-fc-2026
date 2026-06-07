@@ -8,6 +8,7 @@
   <h3>Mission zuweisen</h3>
   <p class="muted small">Eine neue Zuweisung ersetzt die bisherige Mission der Person.</p>
   <form method="post">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <input type="hidden" name="action" value="assign">
     <div class="row">
       <div class="field"><label>Spieler:in</label>
@@ -36,7 +37,8 @@
         <td>{% if m %}{% if m.emoji %}<span class="badge-emoji">{{ m.emoji }}</span> {% endif %}{{ m.name }}<div class="muted small">{{ m.description }}</div>{% else %}<span class="muted">—</span>{% endif %}</td>
         <td class="mono">{% if m %}{{ m.points }}{% endif %}</td>
         <td>{% if a.completed %}<span class="tag green">erfüllt</span>{% else %}<span class="tag muted">offen</span>{% endif %}</td>
-        <td class="r"><form method="post" style="display:inline"><input type="hidden" name="action" value="toggle"><input type="hidden" name="id" value="{{ a.id }}"><button class="btn sm sec">{% if a.completed %}↺ offen{% else %}✓ erfüllt{% endif %}</button></form></td>
+        <td class="r"><form method="post" style="display:inline">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="action" value="toggle"><input type="hidden" name="id" value="{{ a.id }}"><button class="btn sm sec">{% if a.completed %}↺ offen{% else %}✓ erfüllt{% endif %}</button></form></td>
       </tr>
     {% endfor %}
     {% if not assignments %}<tr><td colspan="5" class="muted small">Noch keine Missionen zugewiesen.</td></tr>{% endif %}

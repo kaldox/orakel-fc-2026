@@ -5,6 +5,7 @@
 <div class="card">
   <h3>Neue:n Spieler:in anlegen</h3>
   <form method="post">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <div class="row">
       <div class="field"><label>Name</label><input name="name" required></div>
       <div class="field"><label>Passwort</label><input name="password" required></div>
@@ -23,11 +24,13 @@
         <td>{% if p.is_admin %}<span class="tag gold">Admin</span>{% endif %}{% if p.plays %}<span class="tag green">spielt</span>{% else %}<span class="tag muted">spielt nicht</span>{% endif %}</td>
         <td class="r" style="white-space:nowrap">
           <form method="post" style="display:inline-flex;gap:4px;vertical-align:middle">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <input type="hidden" name="action" value="resetpw"><input type="hidden" name="id" value="{{ p.id }}">
             <input type="text" name="password" placeholder="neues Passwort" style="width:130px;padding:5px 8px">
             <button class="btn sec sm">setzen</button>
           </form>
-          <form method="post" style="display:inline" onsubmit="return confirm('Spieler löschen?')"><input type="hidden" name="action" value="delete"><input type="hidden" name="id" value="{{ p.id }}"><button class="btn danger sm">×</button></form>
+          <form method="post" style="display:inline" onsubmit="return confirm('Spieler löschen?')">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="action" value="delete"><input type="hidden" name="id" value="{{ p.id }}"><button class="btn danger sm">×</button></form>
         </td></tr>
     {% endfor %}
     </tbody>

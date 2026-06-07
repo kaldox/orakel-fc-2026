@@ -15,6 +15,7 @@
     <div class="jinfo" id="ji{{ jt.id }}">{{ help.get(jt.auto_effect, jt.description) }}</div>
     {% if u < jt.max_per_player %}
     <form method="post" style="margin-top:10px">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
       <input type="hidden" name="joker_type_id" value="{{ jt.id }}">
       {% if jt.auto_effect in ['double','allin'] %}
         <div class="field"><label>Auf welches Spiel?</label>

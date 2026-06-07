@@ -20,7 +20,8 @@
           {% if m %}<span class="muted">Spiel:</span> {{ m.home }}–{{ m.away }}{% elif jp.matchday %}<span class="muted">Spieltag:</span> {{ jp.matchday }}{% endif %}
         </td>
         <td class="small">{{ jp.note or '—' }}</td>
-        <td class="r"><form method="post" onsubmit="return confirm('Joker-Eintrag löschen?')"><input type="hidden" name="action" value="delete"><input type="hidden" name="id" value="{{ jp.id }}"><button class="btn danger sm">×</button></form></td>
+        <td class="r"><form method="post" onsubmit="return confirm('Joker-Eintrag löschen?')">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="action" value="delete"><input type="hidden" name="id" value="{{ jp.id }}"><button class="btn danger sm">×</button></form></td>
       </tr>
     {% endfor %}
     {% if not plays %}<tr><td colspan="6" class="muted small">Noch keine Joker gespielt.</td></tr>{% endif %}

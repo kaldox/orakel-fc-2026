@@ -5,6 +5,7 @@
   <p class="sub" style="text-align:center">Wo Kollegen zu Propheten werden.</p>
   <div class="card">
     <form method="post">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
       <div class="field"><label>Name</label><input name="name" autofocus></div>
       <div class="field"><label>Passwort</label><input type="password" name="password"></div>
       <button class="btn" style="width:100%">Glaskugel polieren &amp; rein</button>

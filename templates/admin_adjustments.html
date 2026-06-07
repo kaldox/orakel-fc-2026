@@ -9,6 +9,7 @@
 <div class="card">
   <h3>Neue Anpassung</h3>
   <form method="post">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <div class="row">
       <div class="field"><label>Spieler:in</label>
         <select name="player_id" required>
@@ -33,7 +34,8 @@
         <td class="mono {% if a.points > 0 %}delta-pos{% elif a.points < 0 %}delta-neg{% else %}delta-zero{% endif %}">{{ '+' if a.points > 0 }}{{ a.points }}</td>
         <td class="mono muted">{{ a.matchday or '—' }}</td>
         <td class="small">{{ a.reason or '—' }}</td>
-        <td class="r"><form method="post" onsubmit="return confirm('Anpassung löschen?')"><input type="hidden" name="action" value="delete"><input type="hidden" name="id" value="{{ a.id }}"><button class="btn danger sm">×</button></form></td>
+        <td class="r"><form method="post" onsubmit="return confirm('Anpassung löschen?')">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="action" value="delete"><input type="hidden" name="id" value="{{ a.id }}"><button class="btn danger sm">×</button></form></td>
       </tr>
     {% endfor %}
     {% if not items %}<tr><td colspan="5" class="muted small">Noch keine Anpassungen.</td></tr>{% endif %}

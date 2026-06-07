@@ -8,6 +8,7 @@
 <div class="card" id="editform" style="border-color:rgba(255,210,74,.4);background:linear-gradient(180deg,rgba(255,210,74,.06),transparent)">
   <h3>Spiel bearbeiten <span class="tag gold">#{{ edit.id }}</span></h3>
   <form method="post">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <input type="hidden" name="action" value="edit">
     <input type="hidden" name="id" value="{{ edit.id }}">
     <div class="row">
@@ -29,6 +30,7 @@
 <div class="card">
   <h3>Neues Spiel anlegen</h3>
   <form method="post">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <div class="row">
       <div class="field" style="flex:0;min-width:90px"><label>Spieltag</label><input name="matchday" value="1"></div>
       <div class="field" style="flex:0;min-width:140px"><label>Phase</label><input name="stage" value="Gruppe"></div>
@@ -47,6 +49,7 @@
   <h3>Spiele importieren (JSON)</h3>
   <p class="muted small">Liste von Objekten mit <span class="mono">home, away, kickoff</span> (Format <span class="mono">2026-06-11T18:00</span>) sowie optional <span class="mono">matchday, stage, knockout</span>. Praktisch für den ganzen Spielplan auf einmal (z.&nbsp;B. aus openfootball).</p>
   <form method="post" action="{{ url_for('admin_matches_import') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <div class="field"><textarea name="payload" placeholder='[
   {"home":"Mexiko","away":"Polen","kickoff":"2026-06-11T18:00","matchday":"1","stage":"Gruppe A"},
   {"home":"Kanada","away":"Schweiz","kickoff":"2026-06-12T21:00","matchday":"1","stage":"Gruppe B"}
@@ -69,6 +72,7 @@
         <td class="kickoff">{{ m.kickoff.strftime('%d.%m. %H:%M') }}</td>
         <td>
           <form method="post" action="{{ url_for('admin_result', mid=m.id) }}" style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <input class="score-in" name="home_goals" inputmode="numeric" value="{{ m.home_goals if m.home_goals is not none else '' }}">
             <span class="mono">:</span>
             <input class="score-in" name="away_goals" inputmode="numeric" value="{{ m.away_goals if m.away_goals is not none else '' }}">
@@ -79,7 +83,8 @@
           </form>
         </td>
         <td class="r" style="white-space:nowrap"><a class="btn sec sm" href="{{ url_for('admin_matches', edit=m.id) }}#editform">edit</a>
-          <form method="post" style="display:inline" onsubmit="return confirm('Spiel inkl. Tipps löschen?')"><input type="hidden" name="action" value="delete"><input type="hidden" name="id" value="{{ m.id }}"><button class="btn danger sm">×</button></form></td>
+          <form method="post" style="display:inline" onsubmit="return confirm('Spiel inkl. Tipps löschen?')">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="action" value="delete"><input type="hidden" name="id" value="{{ m.id }}"><button class="btn danger sm">×</button></form></td>
       </tr>
     {% endfor %}
     {% if not matches %}<tr><td colspan="7" class="muted small">Noch keine Spiele angelegt.</td></tr>{% endif %}

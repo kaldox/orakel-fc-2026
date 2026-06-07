@@ -7,6 +7,7 @@
 <div class="card">
   <h3>{% if edit %}Bearbeiten (#{{ edit.id }}){% else %}Neu anlegen{% endif %}</h3>
   <form method="post">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     {% if edit %}<input type="hidden" name="id" value="{{ edit.id }}">{% endif %}
     <div class="row">
     {% for f in cfg.fields %}
@@ -46,6 +47,7 @@
         <td class="r" style="white-space:nowrap">
           {% if kind in ['challenges','awards'] %}
             <form method="post" action="{{ url_for('admin_winner', kind=kind, oid=it.id) }}" style="display:inline-flex;gap:4px">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
               <select name="winner_player_id" class="sm" style="width:auto;padding:4px">
                 <option value="">– Sieger –</option>
                 {% for p in players %}<option value="{{ p.id }}" {% if it.winner_player_id==p.id %}selected{% endif %}>{{ p.name }}</option>{% endfor %}
@@ -53,10 +55,12 @@
             </form>
           {% endif %}
           {% if kind=='chaos' %}
-            <form method="post" action="{{ url_for('admin_chaos_toggle', cid=it.id) }}" style="display:inline"><button class="btn sm {% if it.active %}gold{% else %}sec{% endif %}">{% if it.active %}aktiv ✓{% else %}aktivieren{% endif %}</button></form>
+            <form method="post" action="{{ url_for('admin_chaos_toggle', cid=it.id) }}" style="display:inline">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn sm {% if it.active %}gold{% else %}sec{% endif %}">{% if it.active %}aktiv ✓{% else %}aktivieren{% endif %}</button></form>
           {% endif %}
           <a class="btn sec sm" href="{{ url_for('admin_catalog', kind=kind, edit=it.id) }}">edit</a>
-          <form method="post" style="display:inline" onsubmit="return confirm('Löschen?')"><input type="hidden" name="action" value="delete"><input type="hidden" name="id" value="{{ it.id }}"><button class="btn danger sm">×</button></form>
+          <form method="post" style="display:inline" onsubmit="return confirm('Löschen?')">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="action" value="delete"><input type="hidden" name="id" value="{{ it.id }}"><button class="btn danger sm">×</button></form>
         </td>
       </tr>
     {% endfor %}
