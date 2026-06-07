@@ -1,12 +1,12 @@
 {% extends "base.html" %}
 {% block body %}
-<p class="muted small"><a href="{{ url_for('admin_home') }}">← Admin</a></p>
-<h1>Gespielte Joker</h1>
-<p class="sub">Übersicht aller eingesetzten Joker. Auto-Effekte (Verdoppeln, Glücksbringer, Sabotage usw.) fließen automatisch in die Tabelle – hier kannst du Einträge korrigieren oder löschen.</p>
+<p class="muted small"><a href="{{ url_for('admin_home') }}">← {{ t("Admin") }}</a></p>
+<h1>{{ t("Gespielte Joker") }}</h1>
+<p class="sub">{{ t("Übersicht aller eingesetzten Joker. Auto-Effekte (Verdoppeln, Glücksbringer, Sabotage usw.) fließen automatisch in die Tabelle – hier kannst du Einträge korrigieren oder löschen.") }}</p>
 
 <div class="card" style="padding:8px">
   <table>
-    <thead><tr><th>#</th><th>Spieler:in</th><th>Joker</th><th>Ziel / Bezug</th><th>Notiz</th><th class="r"></th></tr></thead>
+    <thead><tr><th>#</th><th>{{ t("Spieler:in") }}</th><th>{{ t("Joker") }}</th><th>{{ t("Ziel / Bezug") }}</th><th>{{ t("Notiz") }}</th><th class="r"></th></tr></thead>
     <tbody>
     {% for jp in plays %}
       {% set j = jt.get(jp.joker_type_id) %}
@@ -14,17 +14,17 @@
       <tr>
         <td class="mono muted">{{ jp.id }}</td>
         <td><b>{{ pm.get(jp.player_id, '?') }}</b></td>
-        <td>{% if j %}{% if j.emoji %}<span class="badge-emoji">{{ j.emoji }}</span> {% endif %}{{ j.name }}{% if j.auto_effect and j.auto_effect != 'manual' %} <span class="tag green">{{ j.auto_effect }}</span>{% else %} <span class="tag muted">manuell</span>{% endif %}{% else %}<span class="muted">—</span>{% endif %}</td>
+        <td>{% if j %}{% if j.emoji %}<span class="badge-emoji">{{ j.emoji }}</span> {% endif %}{{ j.name }}{% if j.auto_effect and j.auto_effect != 'manual' %} <span class="tag green">{{ j.auto_effect }}</span>{% else %} <span class="tag muted">{{ t("manuell") }}</span>{% endif %}{% else %}<span class="muted">—</span>{% endif %}</td>
         <td class="small">
-          {% if jp.target_player_id %}<span class="muted">Ziel:</span> {{ pm.get(jp.target_player_id, '?') }}<br>{% endif %}
-          {% if m %}<span class="muted">Spiel:</span> {{ m.home }}–{{ m.away }}{% elif jp.matchday %}<span class="muted">Spieltag:</span> {{ jp.matchday }}{% endif %}
+          {% if jp.target_player_id %}<span class="muted">{{ t("Ziel:") }}</span> {{ pm.get(jp.target_player_id, '?') }}<br>{% endif %}
+          {% if m %}<span class="muted">{{ t("Spiel:") }}</span> {{ m.home }}–{{ m.away }}{% elif jp.matchday %}<span class="muted">{{ t("Spieltag:") }}</span> {{ jp.matchday }}{% endif %}
         </td>
         <td class="small">{{ jp.note or '—' }}</td>
-        <td class="r"><form method="post" onsubmit="return confirm('Joker-Eintrag löschen?')">
+        <td class="r"><form method="post" onsubmit="return confirm('{{ t('Joker-Eintrag löschen?') }}')">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="action" value="delete"><input type="hidden" name="id" value="{{ jp.id }}"><button class="btn danger sm">×</button></form></td>
       </tr>
     {% endfor %}
-    {% if not plays %}<tr><td colspan="6" class="muted small">Noch keine Joker gespielt.</td></tr>{% endif %}
+    {% if not plays %}<tr><td colspan="6" class="muted small">{{ t("Noch keine Joker gespielt.") }}</td></tr>{% endif %}
     </tbody>
   </table>
 </div>

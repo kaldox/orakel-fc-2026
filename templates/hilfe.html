@@ -1,63 +1,67 @@
 {% extends "base.html" %}
 {% block body %}
-<h1>Hilfe &amp; Regeln</h1>
-<p class="sub">Alles Wichtige auf einen Blick – ohne Fachchinesisch. Tippe oben rechts jederzeit auf „Hilfe", um hierher zurückzukommen.</p>
+<h1>{{ t("Hilfe & Regeln") }}</h1>
+<p class="sub">{{ t("Alles Wichtige auf einen Blick – ohne Fachchinesisch. Tippe oben rechts jederzeit auf „Hilfe“, um hierher zurückzukommen.") }}</p>
 
 <div class="welcome">
-  <h2>Willkommen beim Tippspiel! 👋</h2>
-  <p>Hier gibst du deine Tipps für die kommenden Spiele ab und kämpfst mit deinen Freunden um den Sieg. Unten findest du die kurze Einführung und die Erklärung zu allen Jokern.</p>
-  <div class="help-strip"><button class="btn" onclick="openTutorial()">📖 Kurze Einführung</button></div>
+  <h2>{{ t("Willkommen beim Tippspiel! 👋") }}</h2>
+  <p>{{ t("Hier gibst du deine Tipps für die kommenden Spiele ab und kämpfst mit deinen Freunden um den Sieg. Unten findest du die kurze Einführung und die Erklärung zu allen Jokern.") }}</p>
+  <div class="help-strip"><button class="btn" onclick="openTutorial()">📖 {{ t("Kurze Einführung") }}</button></div>
 </div>
 
-<h2>So funktioniert das Spiel</h2>
+<h2>{{ t("So funktioniert das Spiel") }}</h2>
 <div class="legend">
-  <div class="li"><span class="ic">⚽</span><div class="tx"><b>Tipp abgeben</b><span>Trag dein Ergebnis vor dem Anpfiff ein. Bis zum Anpfiff kannst du es beliebig ändern.</span></div></div>
-  <div class="li"><span class="ic">🎯</span><div class="tx"><b>Punkte sammeln</b><span>Je genauer dein Tipp, desto mehr Punkte. Das exakte Ergebnis bringt am meisten.</span></div></div>
-  <div class="li"><span class="ic">🃏</span><div class="tx"><b>Joker</b><span>Bringen besondere Vorteile – jeder Joker kann nur einmal eingesetzt werden.</span></div></div>
-  <div class="li"><span class="ic">🏆</span><div class="tx"><b>Rangliste</b><span>Zeigt jederzeit den aktuellen Stand aller Spieler.</span></div></div>
-  <div class="li"><span class="ic">📅</span><div class="tx"><b>Spieltage</b><span>Die Punkte werden nach jedem Spieltag aktualisiert.</span></div></div>
-  <div class="li"><span class="ic">👨‍💼</span><div class="tx"><b>Spielleitung</b><span>Prüft Sonderereignisse und Joker (z.&nbsp;B. den Chaos-Joker) nach dem Spiel.</span></div></div>
+  <div class="li"><span class="ic">⚽</span><div class="tx"><b>{{ t("Tipp abgeben") }}</b><span>{{ t("Trag dein Ergebnis vor dem Anpfiff ein. Bis zum Anpfiff kannst du es beliebig ändern.") }}</span></div></div>
+  <div class="li"><span class="ic">🎯</span><div class="tx"><b>{{ t("Punkte sammeln") }}</b><span>{{ t("Je genauer dein Tipp, desto mehr Punkte. Das exakte Ergebnis bringt am meisten.") }}</span></div></div>
+  {% if not simple_mode %}<div class="li"><span class="ic">🃏</span><div class="tx"><b>{{ t("Joker") }}</b><span>{{ t("Bringen besondere Vorteile – jeder Joker kann nur einmal eingesetzt werden.") }}</span></div></div>{% endif %}
+  <div class="li"><span class="ic">🏆</span><div class="tx"><b>{{ t("Rangliste") }}</b><span>{{ t("Zeigt jederzeit den aktuellen Stand aller Spieler.") }}</span></div></div>
+  <div class="li"><span class="ic">📅</span><div class="tx"><b>{{ t("Spieltage") }}</b><span>{{ t("Die Punkte werden nach jedem Spieltag aktualisiert.") }}</span></div></div>
+  <div class="li"><span class="ic">👨‍💼</span><div class="tx"><b>{{ t("Spielleitung") }}</b><span>{{ t("Prüft Sonderereignisse und Joker (z. B. den Chaos-Joker) nach dem Spiel.") }}</span></div></div>
 </div>
 
-<h2>Punktevergabe</h2>
+<h2>{{ t("Punktevergabe") }}</h2>
 <div class="card" style="padding:8px">
   <table class="points-tbl">
-    <tr><td>Richtige Tendenz (Sieg / Unentschieden / Niederlage)</td><td class="pv">3</td></tr>
-    <tr><td>Richtige Tordifferenz</td><td class="pv">5</td></tr>
-    <tr><td>Exaktes Ergebnis</td><td class="pv">8</td></tr>
-    <tr><td>Bonus K.-o.-Spiel (bei richtiger Tendenz)</td><td class="pv">+2</td></tr>
-    <tr><td>Bonus Überraschung (bei richtiger Tendenz)</td><td class="pv">+3</td></tr>
-    <tr><td>Risiko-Tipp (max. 1 pro Spieltag): richtig / falsch</td><td class="pv">×2 / −4</td></tr>
+    <tr><td>{{ t("Richtige Tendenz (Sieg / Unentschieden / Niederlage)") }}</td><td class="pv">3</td></tr>
+    <tr><td>{{ t("Richtige Tordifferenz") }}</td><td class="pv">5</td></tr>
+    <tr><td>{{ t("Exaktes Ergebnis") }}</td><td class="pv">8</td></tr>
+    <tr><td>{{ t("Bonus K.-o.-Spiel (bei richtiger Tendenz)") }}</td><td class="pv">+2</td></tr>
+    <tr><td>{{ t("Bonus Überraschung (bei richtiger Tendenz)") }}</td><td class="pv">+3</td></tr>
+    <tr><td>{{ t("Risiko-Tipp (max. 1 pro Spieltag): richtig / falsch") }}</td><td class="pv">×2 / −4</td></tr>
   </table>
 </div>
-<p class="muted small">Dazu kommen Punkte aus Missionen, Challenges und Jokern.</p>
+{% if not simple_mode %}<p class="muted small">{{ t("Dazu kommen Punkte aus Missionen, Challenges und Jokern.") }}</p>{% endif %}
 
-<h2>Die Joker erklärt</h2>
+{% if not simple_mode %}
+<h2>{{ t("Die Joker erklärt") }}</h2>
 <div class="grid g2">
 {% for j in jokers %}
   <div class="tile">
     <p class="nm"><span class="badge-emoji">{{ j.emoji }}</span> {{ j.name }}</p>
-    <p class="ds">{{ help.get(j.auto_effect, j.description) }}</p>
-    <p class="small muted" style="margin-top:6px">Verfügbar: {{ j.max_per_player }}× pro Person</p>
+    <p class="ds">{{ t(help.get(j.auto_effect, j.description)) }}</p>
+    <p class="small muted" style="margin-top:6px">{{ t("Verfügbar:") }} {{ j.max_per_player }}{{ t("× pro Person") }}</p>
   </div>
 {% endfor %}
 </div>
 
 <div class="card" style="margin-top:6px">
-  <h3>🔁 Tausch-Joker – ein Beispiel</h3>
-  <p class="muted">Du hast an einem Spieltag nur <b>2 Punkte</b> erzielt. Dein Durchschnitt liegt bei <b>9 Punkten</b>. Mit dem Tausch-Joker werden für diesen schlechtesten Spieltag automatisch <b>9 Punkte</b> gewertet.</p>
+  <h3>🔁 {{ t("Tausch-Joker – ein Beispiel") }}</h3>
+  <p class="muted">{{ t("Du hast an einem Spieltag nur 2 Punkte erzielt. Dein Durchschnitt liegt bei 9 Punkten. Mit dem Tausch-Joker werden für diesen schlechtesten Spieltag automatisch 9 Punkte gewertet.") }}</p>
   <hr class="hr">
-  <h3>🌀 Chaos-Joker – die Bedingung</h3>
-  <p class="muted">Du setzt ihn auf ein Spiel. Kommt darin mindestens eines dieser Ereignisse vor – <b>Unentschieden</b>, <b>Eigentor</b> oder <b>Rote Karte</b> – bekommst du <b>+5 Bonuspunkte</b>. Die endgültige Wertung macht die Spielleitung nach dem Spiel.</p>
+  <h3>🌀 {{ t("Chaos-Joker – die Bedingung") }}</h3>
+  <p class="muted">{{ t("Du setzt ihn auf ein Spiel. Kommt darin mindestens eines dieser Ereignisse vor – Unentschieden, Eigentor oder Rote Karte – bekommst du +5 Bonuspunkte. Die endgültige Wertung macht die Spielleitung nach dem Spiel.") }}</p>
 </div>
 
-<h2>Häufige Fragen</h2>
+{% endif %}
+<h2>{{ t("Häufige Fragen") }}</h2>
 <div class="faq">
-  <details><summary>Kann ich meinen Tipp ändern?</summary><div class="ans">Ja – jederzeit bis zum Anpfiff des jeweiligen Spiels. Danach ist der Tipp gesperrt.</div></details>
-  <details><summary>Kann ich einen Joker zurücknehmen?</summary><div class="ans">Nein. Nach dem Einsatz ist ein Joker endgültig – überleg dir gut, wann du ihn zündest.</div></details>
-  <details><summary>Warum wurde mein Chaos-Joker nicht gewertet?</summary><div class="ans">Die Spielleitung prüft die Bedingung (Unentschieden, Eigentor oder Rote Karte) erst nach dem Spiel und trägt die Punkte dann ein.</div></details>
-  <details><summary>Was ist ein Risiko-Tipp?</summary><div class="ans">Pro Spieltag darfst du einen Tipp als Risiko markieren: Liegst du mit der Tendenz richtig, zählen die Punkte doppelt – liegst du falsch, gibt es −4 Punkte.</div></details>
-  <details><summary>Was bedeutet „Tendenz"?</summary><div class="ans">Ob du Sieg, Unentschieden oder Niederlage richtig getippt hast – unabhängig vom genauen Ergebnis.</div></details>
-  <details><summary>Da steht ein Spiel mit komischem Namen wie „2A"?</summary><div class="ans">Das sind K.-o.-Spiele, deren Teilnehmer noch nicht feststehen. Sobald die Gruppen entschieden sind, trägt die Spielleitung die echten Teams ein.</div></details>
+  <details><summary>{{ t("Kann ich meinen Tipp ändern?") }}</summary><div class="ans">{{ t("Ja – jederzeit bis zum Anpfiff des jeweiligen Spiels. Danach ist der Tipp gesperrt.") }}</div></details>
+  {% if not simple_mode %}
+  <details><summary>{{ t("Kann ich einen Joker zurücknehmen?") }}</summary><div class="ans">{{ t("Nein. Nach dem Einsatz ist ein Joker endgültig – überleg dir gut, wann du ihn zündest.") }}</div></details>
+  <details><summary>{{ t("Warum wurde mein Chaos-Joker nicht gewertet?") }}</summary><div class="ans">{{ t("Die Spielleitung prüft die Bedingung (Unentschieden, Eigentor oder Rote Karte) erst nach dem Spiel und trägt die Punkte dann ein.") }}</div></details>
+  {% endif %}
+  <details><summary>{{ t("Was ist ein Risiko-Tipp?") }}</summary><div class="ans">{{ t("Pro Spieltag darfst du einen Tipp als Risiko markieren: Liegst du mit der Tendenz richtig, zählen die Punkte doppelt – liegst du falsch, gibt es −4 Punkte.") }}</div></details>
+  <details><summary>{{ t("Was bedeutet „Tendenz“?") }}</summary><div class="ans">{{ t("Ob du Sieg, Unentschieden oder Niederlage richtig getippt hast – unabhängig vom genauen Ergebnis.") }}</div></details>
+  <details><summary>{{ t("Da steht ein Spiel mit komischem Namen wie „2A“?") }}</summary><div class="ans">{{ t("Das sind K.-o.-Spiele, deren Teilnehmer noch nicht feststehen. Sobald die Gruppen entschieden sind, trägt die Spielleitung die echten Teams ein.") }}</div></details>
 </div>
 {% endblock %}

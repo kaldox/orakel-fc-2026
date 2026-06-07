@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="{{ lang }}">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -20,24 +20,29 @@
 </head>
 <body>
 {% set ep = request.endpoint %}
+{% macro langsw() %}<span class="langsw"><a class="lang {% if lang=='de' %}on{% endif %}" href="{{ url_for('set_lang', code='de') }}">DE</a><a class="lang {% if lang=='en' %}on{% endif %}" href="{{ url_for('set_lang', code='en') }}">EN</a></span>{% endmacro %}
 {% if me %}
 <header class="top"><div class="top-in">
   <a class="brand" href="{{ url_for('dashboard') }}">ORAKEL <b>FC</b></a>
   <nav class="menu">
-    <a href="{{ url_for('dashboard') }}">Tabelle</a>
-    <a href="{{ url_for('tips') }}">Tippen</a>
-    <a href="{{ url_for('jokers') }}">Joker</a>
-    <a href="{{ url_for('missions') }}">Missionen</a>
-    <a href="{{ url_for('challenges') }}">Challenges</a>
-    <a href="{{ url_for('awards') }}">Awards</a>
-    <a href="{{ url_for('hilfe') }}">Hilfe</a>
-    {% if me.is_admin %}<a class="admin" href="{{ url_for('admin_home') }}">Admin</a>{% endif %}
-    <a href="{{ url_for('passwort') }}">Passwort</a>
-    <a class="logout" href="{{ url_for('logout') }}">Logout ({{ me.name }})</a>
+    <a href="{{ url_for('dashboard') }}">{{ t("Tabelle") }}</a>
+    <a href="{{ url_for('tips') }}">{{ t("Tippen") }}</a>
+    {% if not simple_mode %}
+    <a href="{{ url_for('jokers') }}">{{ t("Joker") }}</a>
+    <a href="{{ url_for('missions') }}">{{ t("Missionen") }}</a>
+    <a href="{{ url_for('challenges') }}">{{ t("Challenges") }}</a>
+    <a href="{{ url_for('awards') }}">{{ t("Awards") }}</a>
+    {% endif %}
+    <a href="{{ url_for('hilfe') }}">{{ t("Hilfe") }}</a>
+    {% if me.is_admin %}<a class="admin" href="{{ url_for('admin_home') }}">{{ t("Admin") }}</a>{% endif %}
+    <a href="{{ url_for('passwort') }}">{{ t("Passwort") }}</a>
+    <a class="logout" href="{{ url_for('logout') }}">{{ t("Logout") }} ({{ me.name }})</a>
+    {{ langsw() }}
   </nav>
 </div></header>
 {% endif %}
 <div class="wrap">
+  {% if not me %}<div class="langsw-top">{{ langsw() }}</div>{% endif %}
   {% with msgs = get_flashed_messages(with_categories=true) %}
     {% for cat, m in msgs %}<div class="flash {{ cat }}">{{ m }}</div>{% endfor %}
   {% endwith %}
@@ -47,33 +52,36 @@
 {% if me %}
 <!-- Untere Tab-Leiste (mobil) -->
 <nav class="bottomnav">
-  <a class="bnav {% if ep=='dashboard' %}active{% endif %}" href="{{ url_for('dashboard') }}"><span class="bi">🏆</span>Tabelle</a>
-  <a class="bnav {% if ep=='tips' %}active{% endif %}" href="{{ url_for('tips') }}"><span class="bi">⚽</span>Tippen</a>
-  <a class="bnav {% if ep=='jokers' %}active{% endif %}" href="{{ url_for('jokers') }}"><span class="bi">🃏</span>Joker</a>
-  <a class="bnav {% if ep=='hilfe' %}active{% endif %}" href="{{ url_for('hilfe') }}"><span class="bi">❓</span>Hilfe</a>
-  <button class="bnav" type="button" id="moreBtn" onclick="toggleMore()"><span class="bi">☰</span>Mehr</button>
+  <a class="bnav {% if ep=='dashboard' %}active{% endif %}" href="{{ url_for('dashboard') }}"><span class="bi">🏆</span>{{ t("Tabelle") }}</a>
+  <a class="bnav {% if ep=='tips' %}active{% endif %}" href="{{ url_for('tips') }}"><span class="bi">⚽</span>{{ t("Tippen") }}</a>
+  {% if not simple_mode %}<a class="bnav {% if ep=='jokers' %}active{% endif %}" href="{{ url_for('jokers') }}"><span class="bi">🃏</span>{{ t("Joker") }}</a>{% endif %}
+  <a class="bnav {% if ep=='hilfe' %}active{% endif %}" href="{{ url_for('hilfe') }}"><span class="bi">❓</span>{{ t("Hilfe") }}</a>
+  <button class="bnav" type="button" id="moreBtn" onclick="toggleMore()"><span class="bi">☰</span>{{ t("Mehr") }}</button>
 </nav>
 <div class="moresheet" id="moresheet">
-  <a href="{{ url_for('missions') }}">🔮 Missionen</a>
-  <a href="{{ url_for('challenges') }}">🎯 Challenges</a>
-  <a href="{{ url_for('awards') }}">🏅 Awards</a>
-  {% if me.is_admin %}<a href="{{ url_for('admin_home') }}">🛠️ Admin</a>{% endif %}
-  <a href="{{ url_for('passwort') }}">🔑 Passwort ändern</a>
-  <a class="logout" href="{{ url_for('logout') }}">🚪 Logout ({{ me.name }})</a>
+  {% if not simple_mode %}
+  <a href="{{ url_for('missions') }}">🔮 {{ t("Missionen") }}</a>
+  <a href="{{ url_for('challenges') }}">🎯 {{ t("Challenges") }}</a>
+  <a href="{{ url_for('awards') }}">🏅 {{ t("Awards") }}</a>
+  {% endif %}
+  {% if me.is_admin %}<a href="{{ url_for('admin_home') }}">🛠️ {{ t("Admin") }}</a>{% endif %}
+  <a href="{{ url_for('passwort') }}">🔑 {{ t("Passwort ändern") }}</a>
+  <a class="logout" href="{{ url_for('logout') }}">🚪 {{ t("Logout") }} ({{ me.name }})</a>
+  <div style="padding:8px 12px">{{ langsw() }}</div>
 </div>
 
 <!-- Tutorial -->
 <div class="modal-overlay" id="tutModal" onclick="if(event.target===this)closeTutorial()">
   <div class="modal">
-    <h2>So funktioniert's 👋</h2>
-    <p class="muted small" style="margin:0 0 8px">In 30 Sekunden erklärt.</p>
-    <div class="tut-step"><span class="n">1</span><span class="ic">⚽</span><div><b>Spiele tippen</b><span>Unter „Tippen" dein Ergebnis eingeben und speichern. Bis zum Anpfiff kannst du es ändern.</span></div></div>
-    <div class="tut-step"><span class="n">2</span><span class="ic">🎯</span><div><b>Punkte sammeln</b><span>Je genauer dein Tipp, desto mehr Punkte. Das exakte Ergebnis bringt am meisten.</span></div></div>
-    <div class="tut-step"><span class="n">3</span><span class="ic">🃏</span><div><b>Joker einsetzen</b><span>Joker bringen Extra-Vorteile – jeder nur einmal. Das ℹ️ neben jedem Joker erklärt, was er macht.</span></div></div>
-    <div class="tut-step"><span class="n">4</span><span class="ic">🏆</span><div><b>Rangliste</b><span>Unter „Tabelle" siehst du jederzeit deinen aktuellen Platz.</span></div></div>
+    <h2>{{ t("So funktioniert's 👋") }}</h2>
+    <p class="muted small" style="margin:0 0 8px">{{ t("In 30 Sekunden erklärt.") }}</p>
+    <div class="tut-step"><span class="n">1</span><span class="ic">⚽</span><div><b>{{ t("Spiele tippen") }}</b><span>{{ t("Unter „Tippen“ dein Ergebnis eingeben und speichern. Bis zum Anpfiff kannst du es ändern.") }}</span></div></div>
+    <div class="tut-step"><span class="n">2</span><span class="ic">🎯</span><div><b>{{ t("Punkte sammeln") }}</b><span>{{ t("Je genauer dein Tipp, desto mehr Punkte. Das exakte Ergebnis bringt am meisten.") }}</span></div></div>
+    {% if not simple_mode %}<div class="tut-step"><span class="n">3</span><span class="ic">🃏</span><div><b>{{ t("Joker einsetzen") }}</b><span>{{ t("Joker bringen Extra-Vorteile – jeder nur einmal. Das ℹ️ neben jedem Joker erklärt, was er macht.") }}</span></div></div>{% endif %}
+    <div class="tut-step"><span class="n">{% if simple_mode %}3{% else %}4{% endif %}</span><span class="ic">🏆</span><div><b>{{ t("Rangliste") }}</b><span>{{ t("Unter „Tabelle“ siehst du jederzeit deinen aktuellen Platz.") }}</span></div></div>
     <div style="display:flex;gap:8px;margin-top:16px">
-      <button class="btn" style="flex:1" onclick="closeTutorial()">Los geht's!</button>
-      <a class="btn sec" href="{{ url_for('hilfe') }}" onclick="closeTutorial()">Mehr Hilfe</a>
+      <button class="btn" style="flex:1" onclick="closeTutorial()">{{ t("Los geht's!") }}</button>
+      <a class="btn sec" href="{{ url_for('hilfe') }}" onclick="closeTutorial()">{{ t("Mehr Hilfe") }}</a>
     </div>
   </div>
 </div>

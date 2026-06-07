@@ -1,66 +1,66 @@
 {% extends "base.html" %}
 {% block body %}
-<p class="muted small"><a href="{{ url_for('admin_home') }}">← Admin</a></p>
-<h1>Spiele &amp; Ergebnisse</h1>
-<p class="sub">Spiele anlegen, Resultate eintragen, Überraschungen markieren. Tipps werden automatisch zum Anpfiff gesperrt.</p>
+<p class="muted small"><a href="{{ url_for('admin_home') }}">← {{ t("Admin") }}</a></p>
+<h1>{{ t("Spiele & Ergebnisse") }}</h1>
+<p class="sub">{{ t("Spiele anlegen, Resultate eintragen, Überraschungen markieren. Tipps werden automatisch zum Anpfiff gesperrt.") }}</p>
 
 {% if edit %}
 <div class="card" id="editform" style="border-color:rgba(255,210,74,.4);background:linear-gradient(180deg,rgba(255,210,74,.06),transparent)">
-  <h3>Spiel bearbeiten <span class="tag gold">#{{ edit.id }}</span></h3>
+  <h3>{{ t("Spiel bearbeiten") }} <span class="tag gold">#{{ edit.id }}</span></h3>
   <form method="post">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <input type="hidden" name="action" value="edit">
     <input type="hidden" name="id" value="{{ edit.id }}">
     <div class="row">
-      <div class="field" style="flex:0;min-width:90px"><label>Spieltag</label><input name="matchday" value="{{ edit.matchday }}"></div>
-      <div class="field" style="flex:0;min-width:160px"><label>Phase</label><input name="stage" value="{{ edit.stage }}"></div>
-      <div class="field"><label>Heim</label><input name="home" required value="{{ edit.home }}"></div>
-      <div class="field"><label>Auswärts</label><input name="away" required value="{{ edit.away }}"></div>
+      <div class="field" style="flex:0;min-width:90px"><label>{{ t("Spieltag") }}</label><input name="matchday" value="{{ edit.matchday }}"></div>
+      <div class="field" style="flex:0;min-width:160px"><label>{{ t("Phase") }}</label><input name="stage" value="{{ edit.stage }}"></div>
+      <div class="field"><label>{{ t("Heim") }}</label><input name="home" required value="{{ edit.home }}"></div>
+      <div class="field"><label>{{ t("Auswärts") }}</label><input name="away" required value="{{ edit.away }}"></div>
     </div>
     <div class="row">
-      <div class="field"><label>Anpfiff</label><input type="datetime-local" name="kickoff" required value="{{ edit.kickoff.strftime('%Y-%m-%dT%H:%M') }}"></div>
-      <div class="field" style="flex:0"><label>K.o.-Spiel?</label><div><input type="checkbox" name="is_knockout" {% if edit.is_knockout %}checked{% endif %}></div></div>
-      <div class="field" style="flex:0;align-self:flex-end"><button class="btn gold">Aktualisieren</button></div>
-      <div class="field" style="flex:0;align-self:flex-end"><a class="btn sec" href="{{ url_for('admin_matches') }}">Abbrechen</a></div>
+      <div class="field"><label>{{ t("Anpfiff") }}</label><input type="datetime-local" name="kickoff" required value="{{ edit.kickoff.strftime('%Y-%m-%dT%H:%M') }}"></div>
+      <div class="field" style="flex:0"><label>{{ t("K.o.-Spiel?") }}</label><div><input type="checkbox" name="is_knockout" {% if edit.is_knockout %}checked{% endif %}></div></div>
+      <div class="field" style="flex:0;align-self:flex-end"><button class="btn gold">{{ t("Aktualisieren") }}</button></div>
+      <div class="field" style="flex:0;align-self:flex-end"><a class="btn sec" href="{{ url_for('admin_matches') }}">{{ t("Abbrechen") }}</a></div>
     </div>
   </form>
 </div>
 {% endif %}
 
 <div class="card">
-  <h3>Neues Spiel anlegen</h3>
+  <h3>{{ t("Neues Spiel anlegen") }}</h3>
   <form method="post">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <div class="row">
-      <div class="field" style="flex:0;min-width:90px"><label>Spieltag</label><input name="matchday" value="1"></div>
-      <div class="field" style="flex:0;min-width:140px"><label>Phase</label><input name="stage" value="Gruppe"></div>
-      <div class="field"><label>Heim</label><input name="home" required placeholder="z.B. Schweiz"></div>
-      <div class="field"><label>Auswärts</label><input name="away" required placeholder="z.B. Brasilien"></div>
+      <div class="field" style="flex:0;min-width:90px"><label>{{ t("Spieltag") }}</label><input name="matchday" value="1"></div>
+      <div class="field" style="flex:0;min-width:140px"><label>{{ t("Phase") }}</label><input name="stage" value="Gruppe"></div>
+      <div class="field"><label>{{ t("Heim") }}</label><input name="home" required placeholder="{{ t('z.B. Schweiz') }}"></div>
+      <div class="field"><label>{{ t("Auswärts") }}</label><input name="away" required placeholder="{{ t('z.B. Brasilien') }}"></div>
     </div>
     <div class="row">
-      <div class="field"><label>Anpfiff</label><input type="datetime-local" name="kickoff" required></div>
-      <div class="field" style="flex:0"><label>K.o.-Spiel?</label><div><input type="checkbox" name="is_knockout"></div></div>
-      <div class="field" style="flex:0;align-self:flex-end"><button class="btn">Anlegen</button></div>
+      <div class="field"><label>{{ t("Anpfiff") }}</label><input type="datetime-local" name="kickoff" required></div>
+      <div class="field" style="flex:0"><label>{{ t("K.o.-Spiel?") }}</label><div><input type="checkbox" name="is_knockout"></div></div>
+      <div class="field" style="flex:0;align-self:flex-end"><button class="btn">{{ t("Anlegen") }}</button></div>
     </div>
   </form>
 </div>
 
 <div class="card">
-  <h3>Spiele importieren (JSON)</h3>
-  <p class="muted small">Liste von Objekten mit <span class="mono">home, away, kickoff</span> (Format <span class="mono">2026-06-11T18:00</span>) sowie optional <span class="mono">matchday, stage, knockout</span>. Praktisch für den ganzen Spielplan auf einmal (z.&nbsp;B. aus openfootball).</p>
+  <h3>{{ t("Spiele importieren (JSON)") }}</h3>
+  <p class="muted small">{{ t("Liste von Objekten mit home, away, kickoff (Format 2026-06-11T18:00) sowie optional matchday, stage, knockout. Praktisch für den ganzen Spielplan auf einmal (z. B. aus openfootball).") }}</p>
   <form method="post" action="{{ url_for('admin_matches_import') }}">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <div class="field"><textarea name="payload" placeholder='[
   {"home":"Mexiko","away":"Polen","kickoff":"2026-06-11T18:00","matchday":"1","stage":"Gruppe A"},
   {"home":"Kanada","away":"Schweiz","kickoff":"2026-06-12T21:00","matchday":"1","stage":"Gruppe B"}
 ]'></textarea></div>
-    <button class="btn sec">Importieren</button>
+    <button class="btn sec">{{ t("Importieren") }}</button>
   </form>
 </div>
 
 <div class="card" style="padding:8px">
   <table>
-    <thead><tr><th>#</th><th>ST</th><th>Phase</th><th>Partie</th><th>Anpfiff</th><th>Ergebnis eintragen</th><th class="r"></th></tr></thead>
+    <thead><tr><th>#</th><th>{{ t("ST") }}</th><th>{{ t("Phase") }}</th><th>{{ t("Partie") }}</th><th>{{ t("Anpfiff") }}</th><th>{{ t("Ergebnis eintragen") }}</th><th class="r"></th></tr></thead>
     <tbody>
     {% for m in matches %}
       <tr class="{% if not m.finished %}{% endif %}">
@@ -68,7 +68,7 @@
         <td class="mono">{{ m.matchday }}</td>
         <td class="small">{{ m.stage }}{% if m.is_knockout %} <span class="tag gold">KO</span>{% endif %}</td>
         <td><b>{{ m.home }}</b> <span class="muted">–</span> <b>{{ m.away }}</b>
-          {% if m.surprise %}<span class="tag coral">Überraschung</span>{% endif %}</td>
+          {% if m.surprise %}<span class="tag coral">{{ t("Überraschung") }}</span>{% endif %}</td>
         <td class="kickoff">{{ m.kickoff.strftime('%d.%m. %H:%M') }}</td>
         <td>
           <form method="post" action="{{ url_for('admin_result', mid=m.id) }}" style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
@@ -76,18 +76,18 @@
             <input class="score-in" name="home_goals" inputmode="numeric" value="{{ m.home_goals if m.home_goals is not none else '' }}">
             <span class="mono">:</span>
             <input class="score-in" name="away_goals" inputmode="numeric" value="{{ m.away_goals if m.away_goals is not none else '' }}">
-            <label class="mono small" style="display:inline-flex;gap:4px;align-items:center;margin:0;white-space:nowrap"><input type="checkbox" name="surprise" {% if m.surprise %}checked{% endif %}> Überr.</label>
+            <label class="mono small" style="display:inline-flex;gap:4px;align-items:center;margin:0;white-space:nowrap"><input type="checkbox" name="surprise" {% if m.surprise %}checked{% endif %}> {{ t("Überr.") }}</label>
             <label class="mono small" style="display:inline-flex;gap:4px;align-items:center;margin:0;white-space:nowrap"><input type="checkbox" name="is_knockout" {% if m.is_knockout %}checked{% endif %}> KO</label>
-            <button class="btn sm">Speichern</button>
+            <button class="btn sm">{{ t("Speichern") }}</button>
             {% if m.finished %}<span class="done small">✓</span>{% endif %}
           </form>
         </td>
         <td class="r" style="white-space:nowrap"><a class="btn sec sm" href="{{ url_for('admin_matches', edit=m.id) }}#editform">edit</a>
-          <form method="post" style="display:inline" onsubmit="return confirm('Spiel inkl. Tipps löschen?')">
+          <form method="post" style="display:inline" onsubmit="return confirm('{{ t('Spiel inkl. Tipps löschen?') }}')">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="action" value="delete"><input type="hidden" name="id" value="{{ m.id }}"><button class="btn danger sm">×</button></form></td>
       </tr>
     {% endfor %}
-    {% if not matches %}<tr><td colspan="7" class="muted small">Noch keine Spiele angelegt.</td></tr>{% endif %}
+    {% if not matches %}<tr><td colspan="7" class="muted small">{{ t("Noch keine Spiele angelegt.") }}</td></tr>{% endif %}
     </tbody>
   </table>
 </div>

@@ -1,20 +1,20 @@
 {% extends "base.html" %}
 {% block body %}
 <div class="welcome">
-  <h2>Willkommen beim Tippspiel! 👋</h2>
-  <p>Hier gibst du deine Tipps für die kommenden Spiele ab und kämpfst mit deinen Freunden um den Sieg. Wenn du neu bist, schau dir kurz die Einführung an.</p>
+  <h2>{{ t("Willkommen beim Tippspiel! 👋") }}</h2>
+  <p>{{ t("Hier gibst du deine Tipps für die kommenden Spiele ab und kämpfst mit deinen Freunden um den Sieg. Wenn du neu bist, schau dir kurz die Einführung an.") }}</p>
   <div class="help-strip">
-    <button class="btn" onclick="openTutorial()">📖 Kurze Einführung</button>
-    <a class="btn sec" href="{{ url_for('tips') }}">⚽ Jetzt tippen</a>
+    <button class="btn" onclick="openTutorial()">📖 {{ t("Kurze Einführung") }}</button>
+    <a class="btn sec" href="{{ url_for('tips') }}">⚽ {{ t("Jetzt tippen") }}</a>
   </div>
 </div>
 
-<h1>Die Tabelle</h1>
-<p class="sub">Live berechnet aus Tipps, Jokern, Missionen, Challenges &amp; Anpassungen.</p>
+<h1>{{ t("Die Tabelle") }}</h1>
+<p class="sub">{{ t("Live berechnet aus Tipps, Jokern, Missionen, Challenges & Anpassungen.") }}</p>
 
-{% if chaos %}
+{% if chaos and not simple_mode %}
 <div class="callout" style="margin-bottom:16px">
-  <b style="color:var(--gold)">Aktive Chaos-Events:</b>
+  <b style="color:var(--gold)">{{ t("Aktive Chaos-Events:") }}</b>
   {% for c in chaos %}<span class="tag gold" style="margin:2px">{{ c.emoji }} {{ c.name }}</span>{% endfor %}
 </div>
 {% endif %}
@@ -22,8 +22,9 @@
 <div class="card" style="padding:6px">
   <table>
     <thead><tr>
-      <th>#</th><th>Orakel</th><th class="r">Tipps</th><th class="r">Joker</th>
-      <th class="r">Miss.</th><th class="r">Chall.</th><th class="r">Anp.</th><th class="r">Total</th>
+      <th>#</th><th>{{ t("Orakel") }}</th><th class="r">{{ t("Tipps") }}</th>
+      {% if not simple_mode %}<th class="r">{{ t("Joker") }}</th><th class="r">{{ t("Miss.") }}</th><th class="r">{{ t("Chall.") }}</th><th class="r">{{ t("Anp.") }}</th>{% endif %}
+      <th class="r">{{ t("Total") }}</th>
     </tr></thead>
     <tbody>
     {% for r in rows %}
@@ -31,36 +32,39 @@
         <td class="rank">{{ r.rank }}</td>
         <td><b>{{ r.player.name }}</b></td>
         <td class="r mono">{{ r.tips }}</td>
+        {% if not simple_mode %}
         <td class="r mono {% if r.joker>0 %}delta-pos{% elif r.joker<0 %}delta-neg{% else %}delta-zero{% endif %}">{{ '%+d' % r.joker if r.joker else 0 }}</td>
         <td class="r mono">{{ r.missions }}</td>
         <td class="r mono">{{ r.challenges }}</td>
         <td class="r mono {% if r.adjust>0 %}delta-pos{% elif r.adjust<0 %}delta-neg{% else %}delta-zero{% endif %}">{{ '%+d' % r.adjust if r.adjust else 0 }}</td>
+        {% endif %}
         <td class="r total">{{ r.total }}</td>
       </tr>
     {% else %}
-      <tr><td colspan="8" class="muted" style="padding:18px">Noch keine Spieler oder Ergebnisse. Die Spielleitung legt unter „Admin“ Spieler &amp; Spiele an.</td></tr>
+      <tr><td colspan="{% if simple_mode %}4{% else %}8{% endif %}" class="muted" style="padding:18px">{{ t("Noch keine Spieler oder Ergebnisse. Die Spielleitung legt unter „Admin“ Spieler & Spiele an.") }}</td></tr>
     {% endfor %}
     </tbody>
   </table>
 </div>
 
+{% if not simple_mode %}
 <div class="grid g2">
   <div>
-    <h2>Deine geheime Mission</h2>
+    <h2>{{ t("Deine geheime Mission") }}</h2>
     {% if my_mission %}
       <div class="secret">
         <h3>{{ my_mission[0].emoji }} {{ my_mission[0].name }}</h3>
         <p class="muted">{{ my_mission[0].description }}</p>
-        <span class="tag green">{{ my_mission[0].points }} Punkte</span>
-        {% if my_mission[1].completed %}<span class="tag gold">erfüllt ✓</span>{% else %}<span class="tag muted">offen</span>{% endif %}
-        <p class="small muted" style="margin-top:10px">Pssst – niemand sonst sieht diese Mission.</p>
+        <span class="tag green">{{ my_mission[0].points }} {{ t("Punkte") }}</span>
+        {% if my_mission[1].completed %}<span class="tag gold">{{ t("erfüllt ✓") }}</span>{% else %}<span class="tag muted">{{ t("offen") }}</span>{% endif %}
+        <p class="small muted" style="margin-top:10px">{{ t("Pssst – niemand sonst sieht diese Mission.") }}</p>
       </div>
     {% else %}
-      <div class="card muted">Dir wurde noch keine Mission zugewiesen.</div>
+      <div class="card muted">{{ t("Dir wurde noch keine Mission zugewiesen.") }}</div>
     {% endif %}
   </div>
   <div>
-    <h2>Deine gespielten Joker</h2>
+    <h2>{{ t("Deine gespielten Joker") }}</h2>
     {% if my_jokers %}
       <div class="card" style="padding:8px">
         {% for jp in my_jokers %}
@@ -68,13 +72,14 @@
           <div style="padding:8px 6px;border-bottom:1px solid var(--line)">
             <b>{{ jt.emoji if jt }} {{ jt.name if jt else '—' }}</b>
             {% if jp.match_id and matches.get(jp.match_id) %}<span class="small muted">→ {{ matches[jp.match_id].home }} vs {{ matches[jp.match_id].away }}</span>{% endif %}
-            {% if jp.matchday and not jp.match_id %}<span class="small muted">→ Spieltag {{ jp.matchday }}</span>{% endif %}
+            {% if jp.matchday and not jp.match_id %}<span class="small muted">→ {{ t("Spieltag") }} {{ jp.matchday }}</span>{% endif %}
           </div>
         {% endfor %}
       </div>
     {% else %}
-      <div class="card muted">Noch keinen Joker gespielt. <a href="{{ url_for('jokers') }}">Joker ansehen →</a></div>
+      <div class="card muted">{{ t("Noch keinen Joker gespielt.") }} <a href="{{ url_for('jokers') }}">{{ t("Joker ansehen →") }}</a></div>
     {% endif %}
   </div>
 </div>
+{% endif %}
 {% endblock %}

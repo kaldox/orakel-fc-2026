@@ -2,15 +2,15 @@
 {% block body %}
 <div style="max-width:380px;margin:8vh auto 0">
   <h1 style="text-align:center">ORAKEL <span style="color:var(--gold)">FC</span></h1>
-  <p class="sub" style="text-align:center">Wo Kollegen zu Propheten werden.</p>
+  <p class="sub" style="text-align:center">{{ t("Wo Kollegen zu Propheten werden.") }}</p>
   <div class="card">
     <form method="post">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-      <div class="field"><label>Name</label><input name="name" autofocus></div>
-      <div class="field"><label>Passwort</label><input type="password" name="password"></div>
-      <button class="btn" style="width:100%">Glaskugel polieren &amp; rein</button>
+      <div class="field"><label>{{ t("Name") }}</label><input name="name" autofocus></div>
+      <div class="field"><label>{{ t("Passwort") }}</label><input type="password" name="password"></div>
+      <button class="btn" style="width:100%">{{ t("Glaskugel polieren & rein") }}</button>
     </form>
   </div>
-  <p class="muted small" style="text-align:center">Noch keinen Zugang? Frag die Spielleitung.</p>
+  <p class="muted small" style="text-align:center">{{ t("Noch keinen Zugang? Frag die Spielleitung.") }}</p>
 </div>
 {% endblock %}

@@ -1,34 +1,34 @@
 {% extends "base.html" %}
 {% block body %}
-<h1>Tippen</h1>
-<p class="sub">Pro Spieltag darfst du genau <b>einen</b> Tipp als <span class="tag coral">Risiko</span> markieren (×2 oder −4). Nach Anpfiff ist ein Tipp gesperrt.</p>
+<h1>{{ t("Tippen") }}</h1>
+<p class="sub">{{ t("Pro Spieltag darfst du genau einen Tipp als Risiko markieren (×2 oder −4). Nach Anpfiff ist ein Tipp gesperrt.") }}</p>
 
 {% for md, ms in groups.items() %}
   <div class="card">
-    <h3>Spieltag {{ md }}</h3>
+    <h3>{{ t("Spieltag") }} {{ md }}</h3>
     {% for m in ms %}
-      {% set t = mytips.get(m.id) %}
+      {% set tp = mytips.get(m.id) %}
       <form method="post" id="m{{ m.id }}" class="matchrow {% if m.locked %}locked{% endif %}">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <input type="hidden" name="match_id" value="{{ m.id }}">
         <div class="teams">
           {{ m.home }} <span class="muted">vs</span> {{ m.away }}<br>
-          <span class="kickoff">{{ m.kickoff.strftime('%d.%m. %H:%M') }} · {{ m.stage }}{% if m.is_knockout %} · K.o.{% endif %}</span>
+          <span class="kickoff">{{ m.kickoff.strftime('%d.%m. %H:%M') }} · {{ m.stage }}{% if m.is_knockout %} · {{ t("K.o.") }}{% endif %}</span>
         </div>
         {% if m.has_result %}
           <span class="result">{{ m.home_goals }}:{{ m.away_goals }}</span>
         {% endif %}
-        <input class="score-in" type="number" min="0" name="home" value="{{ t.home if t is not none }}" {% if m.locked %}disabled{% endif %}>
+        <input class="score-in" type="number" min="0" name="home" value="{{ tp.home if tp is not none }}" {% if m.locked %}disabled{% endif %}>
         <span class="muted">:</span>
-        <input class="score-in" type="number" min="0" name="away" value="{{ t.away if t is not none }}" {% if m.locked %}disabled{% endif %}>
+        <input class="score-in" type="number" min="0" name="away" value="{{ tp.away if tp is not none }}" {% if m.locked %}disabled{% endif %}>
         <label class="small" style="margin:0;display:flex;gap:5px;align-items:center;color:var(--coral)">
-          <input type="checkbox" name="risk" {% if t and t.is_risk %}checked{% endif %} {% if m.locked %}disabled{% endif %}> Risiko
+          <input type="checkbox" name="risk" {% if tp and tp.is_risk %}checked{% endif %} {% if m.locked %}disabled{% endif %}> {{ t("Risiko") }}
         </label>
-        {% if not m.locked %}<button class="btn sm">Speichern</button>{% else %}<span class="tag muted">gesperrt</span>{% endif %}
+        {% if not m.locked %}<button class="btn sm">{{ t("Speichern") }}</button>{% else %}<span class="tag muted">{{ t("gesperrt") }}</span>{% endif %}
       </form>
     {% endfor %}
   </div>
 {% else %}
-  <div class="card muted">Es wurden noch keine Spiele angelegt.</div>
+  <div class="card muted">{{ t("Es wurden noch keine Spiele angelegt.") }}</div>
 {% endfor %}
 {% endblock %}

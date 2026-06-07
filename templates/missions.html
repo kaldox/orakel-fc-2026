@@ -1,24 +1,24 @@
 {% extends "base.html" %}
 {% block body %}
-<h1>Missionen</h1>
-<p class="sub">Deine Mission ist geheim. Der Katalog unten zeigt, was im Topf sein könnte – aber nicht, wer was hat.</p>
+<h1>{{ t("Missionen") }}</h1>
+<p class="sub">{{ t("Deine Mission ist geheim. Der Katalog unten zeigt, was im Topf sein könnte – aber nicht, wer was hat.") }}</p>
 
-<h2>Deine Mission</h2>
+<h2>{{ t("Deine Mission") }}</h2>
 {% if mine %}
   <div class="secret">
     <h3>{{ mine[0].emoji }} {{ mine[0].name }}</h3>
     <p class="muted">{{ mine[0].description }}</p>
-    <span class="tag green">{{ mine[0].points }} Punkte</span>
-    {% if mine[1].completed %}<span class="tag gold">erfüllt ✓</span>{% endif %}
+    <span class="tag green">{{ mine[0].points }} {{ t("Punkte") }}</span>
+    {% if mine[1].completed %}<span class="tag gold">{{ t("erfüllt ✓") }}</span>{% endif %}
   </div>
 {% else %}
-  <div class="card muted">Dir wurde noch keine Mission zugewiesen.</div>
+  <div class="card muted">{{ t("Dir wurde noch keine Mission zugewiesen.") }}</div>
 {% endif %}
 
-<h2>Der Missions-Katalog</h2>
+<h2>{{ t("Der Missions-Katalog") }}</h2>
 <div class="grid g2">
 {% for m in catalog %}
-  <div class="tile"><p class="nm"><span class="badge-emoji">{{ m.emoji }}</span> {{ m.name }}<span class="tag green" style="margin-left:auto">{{ m.points }} P</span></p><p class="ds">{{ m.description }}</p></div>
+  <div class="tile"><p class="nm"><span class="badge-emoji">{{ m.emoji }}</span> {{ m.name }}<span class="tag green" style="margin-left:auto">{{ m.points }} {{ t("P") }}</span></p><p class="ds">{{ m.description }}</p></div>
 {% endfor %}
 </div>
 {% endblock %}

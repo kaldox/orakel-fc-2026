@@ -14,10 +14,12 @@ from functools import wraps
 from math import floor
 
 from flask import (Flask, render_template, request, redirect, url_for,
-                   session, flash, abort)
+                   session, flash, abort, has_request_context)
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf.csrf import CSRFProtect, CSRFError
 from werkzeug.security import generate_password_hash, check_password_hash
+
+from i18n import TR_EN
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.environ.get("DATA_DIR", os.path.join(BASE_DIR, "data"))
@@ -65,8 +67,40 @@ def _bf_clear(name):
 
 @app.errorhandler(CSRFError)
 def _handle_csrf(e):
-    flash("Deine Sitzung ist abgelaufen. Bitte lade die Seite neu und versuch es erneut.", "error")
+    flash(t("Deine Sitzung ist abgelaufen. Bitte lade die Seite neu und versuch es erneut."), "error")
     return redirect(request.referrer or url_for("login"))
+
+
+# --- Mehrsprachigkeit (Standard: Englisch; Deutsch als Rueckfall) ---
+def get_lang():
+    lang = session.get("lang") if has_request_context() else None
+    if lang in ("en", "de"):
+        return lang
+    # Keine explizite Wahl -> an Browsersprache ausrichten (sonst Englisch).
+    if has_request_context():
+        best = request.accept_languages.best_match(["de", "en"])
+        if best:
+            return best
+    return "en"
+
+
+def t(s, **kw):
+    """Uebersetzt den deutschen Quelltext s. In EN via Tabelle, sonst (DE) 1:1.
+    Fehlt ein Eintrag, bleibt der deutsche Text stehen (kein Crash)."""
+    out = s if get_lang() == "de" else TR_EN.get(s, s)
+    if kw:
+        try:
+            out = out.format(**kw)
+        except Exception:
+            pass
+    return out
+
+
+@app.route("/lang/<code>")
+def set_lang(code):
+    if code in ("en", "de"):
+        session["lang"] = code
+    return redirect(request.referrer or url_for("dashboard"))
 
 
 class Player(db.Model):
@@ -183,6 +217,31 @@ class Adjustment(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 
+class Setting(db.Model):
+    """Einfacher Schluessel/Wert-Speicher fuer App-Einstellungen."""
+    key = db.Column(db.String(50), primary_key=True)
+    value = db.Column(db.String(200), default="")
+
+
+def get_setting(key, default=""):
+    s = db.session.get(Setting, key)
+    return s.value if s else default
+
+
+def set_setting(key, value):
+    s = db.session.get(Setting, key)
+    if s:
+        s.value = value
+    else:
+        db.session.add(Setting(key=key, value=value))
+    db.session.commit()
+
+
+def is_simple():
+    """True = 'Nur Tippspiel' (Joker/Missionen/Challenges/Awards/Chaos aus)."""
+    return get_setting("simple_mode", "0") == "1"
+
+
 def current_player():
     pid = session.get("pid")
     return db.session.get(Player, pid) if pid else None
@@ -209,7 +268,8 @@ def admin_required(f):
 
 @app.context_processor
 def inject_globals():
-    return {"me": current_player(), "league_name": LEAGUE_NAME}
+    return {"me": current_player(), "league_name": LEAGUE_NAME,
+            "t": t, "lang": get_lang(), "simple_mode": is_simple()}
 
 
 @app.after_request
@@ -352,7 +412,7 @@ def login():
         name = request.form.get("name", "").strip()
         pw = request.form.get("password", "")
         if name and _bf_locked(name):
-            flash("Zu viele Fehlversuche. Bitte warte ein paar Minuten und versuch es erneut.", "error")
+            flash(t("Zu viele Fehlversuche. Bitte warte ein paar Minuten und versuch es erneut."), "error")
             return render_template("login.html")
         p = Player.query.filter_by(name=name).first()
         if p and check_password_hash(p.pw_hash, pw):
@@ -361,7 +421,7 @@ def login():
             return redirect(request.args.get("next") or url_for("dashboard"))
         if name:
             _bf_record(name)
-        flash("Name oder Passwort stimmt nicht.", "error")
+        flash(t("Name oder Passwort stimmt nicht."), "error")
     return render_template("login.html")
 
 
@@ -398,30 +458,30 @@ def tips():
         if not m:
             abort(404)
         if m.locked:
-            flash("Anpfiff vorbei – dieser Tipp ist gesperrt.", "error")
+            flash(t("Anpfiff vorbei – dieser Tipp ist gesperrt."), "error")
             return redirect(url_for("tips"))
         try:
             h = int(request.form["home"]); a = int(request.form["away"])
         except (ValueError, KeyError):
-            flash("Bitte gültige Zahlen eintippen.", "error")
+            flash(t("Bitte gültige Zahlen eintippen."), "error")
             return redirect(url_for("tips"))
         risk = bool(request.form.get("risk"))
-        t = Tip.query.filter_by(player_id=me.id, match_id=mid).first()
-        if not t:
-            t = Tip(player_id=me.id, match_id=mid)
-            db.session.add(t)
-        t.home, t.away, t.is_risk = max(0, h), max(0, a), risk
+        tp = Tip.query.filter_by(player_id=me.id, match_id=mid).first()
+        if not tp:
+            tp = Tip(player_id=me.id, match_id=mid)
+            db.session.add(tp)
+        tp.home, tp.away, tp.is_risk = max(0, h), max(0, a), risk
         if risk:
             for other in Tip.query.filter_by(player_id=me.id, is_risk=True).all():
                 om = db.session.get(Match, other.match_id)
-                if other.id != t.id and om and om.matchday == m.matchday:
+                if other.id != tp.id and om and om.matchday == m.matchday:
                     other.is_risk = False
         db.session.commit()
-        flash("Tipp gespeichert.", "ok")
+        flash(t("Tipp gespeichert."), "ok")
         return redirect(url_for("tips") + ("#m%d" % mid))
 
     all_matches = Match.query.order_by(Match.kickoff, Match.id).all()
-    mytips = {t.match_id: t for t in Tip.query.filter_by(player_id=me.id).all()}
+    mytips = {tp.match_id: tp for tp in Tip.query.filter_by(player_id=me.id).all()}
     groups = {}
     for m in all_matches:
         groups.setdefault(m.matchday, []).append(m)
@@ -431,6 +491,8 @@ def tips():
 @app.route("/jokers", methods=["GET", "POST"])
 @login_required
 def jokers():
+    if is_simple():
+        return redirect(url_for("dashboard"))
     me = current_player()
     if request.method == "POST":
         jt = db.session.get(JokerType, int(request.form["joker_type_id"]))
@@ -438,7 +500,7 @@ def jokers():
             abort(404)
         used = JokerPlay.query.filter_by(player_id=me.id, joker_type_id=jt.id).count()
         if used >= jt.max_per_player:
-            flash("Joker '%s' ist aufgebraucht." % jt.name, "error")
+            flash(t("Joker '{n}' ist aufgebraucht.", n=jt.name), "error")
             return redirect(url_for("jokers"))
         play = JokerPlay(player_id=me.id, joker_type_id=jt.id,
                          note=request.form.get("note", "")[:200])
@@ -454,7 +516,7 @@ def jokers():
             play.target_player_id = int(request.form["target_player_id"])
         db.session.add(play)
         db.session.commit()
-        flash("Joker '%s' aktiviert." % jt.name, "ok")
+        flash(t("Joker '{n}' aktiviert.", n=jt.name), "ok")
         return redirect(url_for("jokers"))
 
     types = JokerType.query.filter_by(active=True).order_by(JokerType.id).all()
@@ -475,6 +537,8 @@ def jokers():
 @app.route("/missions")
 @login_required
 def missions():
+    if is_simple():
+        return redirect(url_for("dashboard"))
     me = current_player()
     a = MissionAssignment.query.filter_by(player_id=me.id).first()
     mine = (db.session.get(Mission, a.mission_id), a) if a else None
@@ -485,6 +549,8 @@ def missions():
 @app.route("/challenges")
 @login_required
 def challenges():
+    if is_simple():
+        return redirect(url_for("dashboard"))
     items = Challenge.query.order_by(Challenge.id).all()
     return render_template("challenges.html", items=items,
                            pmap={p.id: p.name for p in Player.query.all()})
@@ -493,6 +559,8 @@ def challenges():
 @app.route("/awards")
 @login_required
 def awards():
+    if is_simple():
+        return redirect(url_for("dashboard"))
     items = Award.query.order_by(Award.id).all()
     return render_template("awards.html", items=items,
                            pmap={p.id: p.name for p in Player.query.all()})
@@ -507,15 +575,15 @@ def passwort():
         new = request.form.get("new", "")
         confirm = request.form.get("confirm", "")
         if not check_password_hash(me.pw_hash, cur):
-            flash("Dein aktuelles Passwort stimmt nicht.", "error")
+            flash(t("Dein aktuelles Passwort stimmt nicht."), "error")
         elif len(new) < 6:
-            flash("Das neue Passwort muss mindestens 6 Zeichen haben.", "error")
+            flash(t("Das neue Passwort muss mindestens 6 Zeichen haben."), "error")
         elif new != confirm:
-            flash("Die beiden neuen Passwörter stimmen nicht überein.", "error")
+            flash(t("Die beiden neuen Passwörter stimmen nicht überein."), "error")
         else:
             me.pw_hash = generate_password_hash(new)
             db.session.commit()
-            flash("Passwort geändert. ✓", "ok")
+            flash(t("Passwort geändert. ✓"), "ok")
             return redirect(url_for("passwort"))
     return render_template("passwort.html")
 
@@ -596,7 +664,7 @@ def admin_catalog(kind):
             obj = db.session.get(Model, int(request.form["id"]))
             if obj:
                 db.session.delete(obj); db.session.commit()
-                flash("Gelöscht.", "ok")
+                flash(t("Gelöscht."), "ok")
             return redirect(url_for("admin_catalog", kind=kind))
         oid = request.form.get("id")
         obj = db.session.get(Model, int(oid)) if oid else Model()
@@ -605,7 +673,7 @@ def admin_catalog(kind):
         if not oid:
             db.session.add(obj)
         db.session.commit()
-        flash("Gespeichert.", "ok")
+        flash(t("Gespeichert."), "ok")
         return redirect(url_for("admin_catalog", kind=kind))
     items = Model.query.order_by(Model.id).all()
     edit = db.session.get(Model, int(request.args["edit"])) if request.args.get("edit") else None
@@ -626,6 +694,14 @@ def admin_home():
     return render_template("admin_home.html", stats=stats, catalogs=CATALOGS)
 
 
+@app.route("/admin/mode", methods=["POST"])
+@admin_required
+def admin_mode():
+    set_setting("simple_mode", "1" if request.form.get("simple") == "1" else "0")
+    flash(t("Modus geändert."), "ok")
+    return redirect(url_for("admin_home"))
+
+
 @app.route("/admin/players", methods=["GET", "POST"])
 @admin_required
 def admin_players():
@@ -641,21 +717,21 @@ def admin_players():
             if p and len(newpw) >= 6:
                 p.pw_hash = generate_password_hash(newpw)
                 db.session.commit()
-                flash("Neues Passwort für %s gesetzt." % p.name, "ok")
+                flash(t("Neues Passwort für {n} gesetzt.", n=p.name), "ok")
             elif p:
-                flash("Neues Passwort braucht mindestens 6 Zeichen.", "error")
+                flash(t("Neues Passwort braucht mindestens 6 Zeichen."), "error")
             return redirect(url_for("admin_players"))
         name = request.form.get("name", "").strip()
         pw = request.form.get("password", "")
         if name and pw:
             if Player.query.filter_by(name=name).first():
-                flash("Name existiert schon.", "error")
+                flash(t("Name existiert schon."), "error")
             else:
                 db.session.add(Player(name=name, pw_hash=generate_password_hash(pw),
                                       is_admin=bool(request.form.get("is_admin")),
                                       plays=bool(request.form.get("plays", "on"))))
                 db.session.commit()
-                flash("Spieler:in angelegt.", "ok")
+                flash(t("Spieler:in angelegt."), "ok")
         return redirect(url_for("admin_players"))
     return render_template("admin_players.html", players=Player.query.order_by(Player.id).all())
 
@@ -674,7 +750,7 @@ def admin_matches():
         try:
             kickoff = datetime.strptime(request.form["kickoff"], "%Y-%m-%dT%H:%M")
         except (ValueError, KeyError):
-            flash("Ungültiger Anpfiff-Zeitpunkt.", "error")
+            flash(t("Ungültiger Anpfiff-Zeitpunkt."), "error")
             return redirect(url_for("admin_matches"))
         if action == "edit":
             m = db.session.get(Match, int(request.form["id"]))
@@ -686,14 +762,14 @@ def admin_matches():
                 m.stage = request.form.get("stage", "Gruppe").strip() or "Gruppe"
                 m.is_knockout = bool(request.form.get("is_knockout"))
                 db.session.commit()
-                flash("Spiel aktualisiert.", "ok")
+                flash(t("Spiel aktualisiert."), "ok")
             return redirect(url_for("admin_matches"))
         db.session.add(Match(matchday=request.form.get("matchday", "1").strip() or "1",
                              stage=request.form.get("stage", "Gruppe").strip() or "Gruppe",
                              home=request.form["home"].strip(), away=request.form["away"].strip(),
                              kickoff=kickoff, is_knockout=bool(request.form.get("is_knockout"))))
         db.session.commit()
-        flash("Spiel angelegt.", "ok")
+        flash(t("Spiel angelegt."), "ok")
         return redirect(url_for("admin_matches"))
     matches = Match.query.order_by(Match.kickoff, Match.id).all()
     edit = db.session.get(Match, int(request.args["edit"])) if request.args.get("edit") else None
@@ -715,9 +791,9 @@ def admin_matches_import():
                                  is_knockout=bool(row.get("knockout", False))))
             n += 1
         db.session.commit()
-        flash("%d Spiele importiert." % n, "ok")
+        flash(t("{n} Spiele importiert.", n=n), "ok")
     except Exception as e:
-        flash("Import fehlgeschlagen: %s" % e, "error")
+        flash(t("Import fehlgeschlagen: {e}", e=e), "error")
     return redirect(url_for("admin_matches"))
 
 
@@ -737,7 +813,7 @@ def admin_result(mid):
     m.surprise = bool(request.form.get("surprise"))
     m.is_knockout = bool(request.form.get("is_knockout"))
     db.session.commit()
-    flash("Ergebnis gespeichert.", "ok")
+    flash(t("Ergebnis gespeichert."), "ok")
     return redirect(url_for("admin_matches"))
 
 
@@ -752,7 +828,7 @@ def admin_assign():
                 a = MissionAssignment(player_id=pid); db.session.add(a)
             a.mission_id = mid; a.completed = False
             db.session.commit()
-            flash("Mission zugewiesen.", "ok")
+            flash(t("Mission zugewiesen."), "ok")
         elif request.form.get("action") == "toggle":
             a = db.session.get(MissionAssignment, int(request.form["id"]))
             if a:
@@ -777,7 +853,7 @@ def admin_winner(kind, oid):
         val = request.form.get("winner_player_id")
         obj.winner_player_id = int(val) if val else None
         db.session.commit()
-        flash("Gewinner:in gesetzt.", "ok")
+        flash(t("Gewinner:in gesetzt."), "ok")
     return redirect(url_for("admin_catalog", kind=kind))
 
 
@@ -798,7 +874,7 @@ def admin_adjustments():
                                   matchday=request.form.get("matchday", "").strip() or None,
                                   reason=request.form.get("reason", "")[:200]))
         db.session.commit()
-        flash("Anpassung gespeichert.", "ok")
+        flash(t("Anpassung gespeichert."), "ok")
         return redirect(url_for("admin_adjustments"))
     return render_template("admin_adjustments.html",
                            players=Player.query.filter_by(plays=True).all(),

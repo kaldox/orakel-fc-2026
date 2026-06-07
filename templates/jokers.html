@@ -1,53 +1,53 @@
 {% extends "base.html" %}
 {% block body %}
-<h1>Joker</h1>
-<p class="sub">Strategie pur. Ein Joker-Einsatz ist endgültig – überleg dir gut, wann du ihn zündest.</p>
+<h1>{{ t("Joker") }}</h1>
+<p class="sub">{{ t("Strategie pur. Ein Joker-Einsatz ist endgültig – überleg dir gut, wann du ihn zündest.") }}</p>
 
 <div class="grid g2">
 {% for jt in types %}
   {% set u = used.get(jt.id, 0) %}
   <div class="tile">
     <p class="nm"><span class="badge-emoji">{{ jt.emoji }}</span> {{ jt.name }}
-      <button class="ibtn" type="button" title="Was macht dieser Joker?" onclick="toggleInfo('ji{{ jt.id }}')" style="margin-left:6px">ℹ️</button>
-      <span class="tag {% if u < jt.max_per_player %}green{% else %}muted{% endif %}" style="margin-left:auto">{{ jt.max_per_player - u }}/{{ jt.max_per_player }} frei</span>
+      <button class="ibtn" type="button" title="{{ t('Was macht dieser Joker?') }}" onclick="toggleInfo('ji{{ jt.id }}')" style="margin-left:6px">ℹ️</button>
+      <span class="tag {% if u < jt.max_per_player %}green{% else %}muted{% endif %}" style="margin-left:auto">{{ jt.max_per_player - u }}/{{ jt.max_per_player }} {{ t("frei") }}</span>
     </p>
     <p class="ds">{{ jt.description }}</p>
-    <div class="jinfo" id="ji{{ jt.id }}">{{ help.get(jt.auto_effect, jt.description) }}</div>
+    <div class="jinfo" id="ji{{ jt.id }}">{{ t(help.get(jt.auto_effect, jt.description)) }}</div>
     {% if u < jt.max_per_player %}
     <form method="post" style="margin-top:10px">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
       <input type="hidden" name="joker_type_id" value="{{ jt.id }}">
       {% if jt.auto_effect in ['double','allin'] %}
-        <div class="field"><label>Auf welches Spiel?</label>
+        <div class="field"><label>{{ t("Auf welches Spiel?") }}</label>
           <select name="match_id" required>
-            <option value="">— Spiel wählen —</option>
-            {% for m in upcoming %}<option value="{{ m.id }}">ST {{ m.matchday }}: {{ m.home }} vs {{ m.away }} ({{ m.kickoff.strftime('%d.%m %H:%M') }})</option>{% endfor %}
+            <option value="">{{ t("— Spiel wählen —") }}</option>
+            {% for m in upcoming %}<option value="{{ m.id }}">{{ t("ST") }} {{ m.matchday }}: {{ m.home }} vs {{ m.away }} ({{ m.kickoff.strftime('%d.%m %H:%M') }})</option>{% endfor %}
           </select></div>
       {% elif jt.auto_effect == 'sabotage' %}
         <div class="row">
-          <div class="field"><label>Ziel</label><select name="target_player_id" required><option value="">—</option>{% for o in opponents %}<option value="{{ o.id }}">{{ o.name }}</option>{% endfor %}</select></div>
-          <div class="field"><label>Spieltag</label><select name="matchday" required><option value="">—</option>{% for d in matchdays %}<option>{{ d }}</option>{% endfor %}</select></div>
+          <div class="field"><label>{{ t("Ziel") }}</label><select name="target_player_id" required><option value="">—</option>{% for o in opponents %}<option value="{{ o.id }}">{{ o.name }}</option>{% endfor %}</select></div>
+          <div class="field"><label>{{ t("Spieltag") }}</label><select name="matchday" required><option value="">—</option>{% for d in matchdays %}<option>{{ d }}</option>{% endfor %}</select></div>
         </div>
       {% elif jt.auto_effect in ['triple','shield','lucky'] %}
-        <div class="field"><label>Spieltag</label><select name="matchday" required><option value="">—</option>{% for d in matchdays %}<option>{{ d }}</option>{% endfor %}</select></div>
+        <div class="field"><label>{{ t("Spieltag") }}</label><select name="matchday" required><option value="">—</option>{% for d in matchdays %}<option>{{ d }}</option>{% endfor %}</select></div>
       {% else %}
-        <div class="field"><label>Notiz (optional, für die Spielleitung)</label><input name="note" placeholder="z.B. Spiel X, Grund …"></div>
+        <div class="field"><label>{{ t("Notiz (optional, für die Spielleitung)") }}</label><input name="note" placeholder="{{ t('z.B. Spiel X, Grund …') }}"></div>
       {% endif %}
-      <button class="btn gold sm">Joker zünden</button>
+      <button class="btn gold sm">{{ t("Joker zünden") }}</button>
     </form>
-    {% else %}<p class="small muted" style="margin-top:8px">Aufgebraucht.</p>{% endif %}
+    {% else %}<p class="small muted" style="margin-top:8px">{{ t("Aufgebraucht.") }}</p>{% endif %}
   </div>
 {% endfor %}
 </div>
 
 {% if myplays %}
-<h2>Bereits gezündet</h2>
+<h2>{{ t("Bereits gezündet") }}</h2>
 <div class="card" style="padding:8px">
 {% for jp in myplays %}{% set jt = jt_map.get(jp.joker_type_id) %}
   <div style="padding:7px 6px;border-bottom:1px solid var(--line)">
     <b>{{ jt.emoji if jt }} {{ jt.name if jt }}</b>
     {% if jp.match_id and m_map.get(jp.match_id) %}<span class="small muted">→ {{ m_map[jp.match_id].home }} vs {{ m_map[jp.match_id].away }}</span>
-    {% elif jp.matchday %}<span class="small muted">→ Spieltag {{ jp.matchday }}</span>{% endif %}
+    {% elif jp.matchday %}<span class="small muted">→ {{ t("Spieltag") }} {{ jp.matchday }}</span>{% endif %}
   </div>
 {% endfor %}
 </div>

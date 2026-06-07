@@ -8,15 +8,6 @@ Dein selbst gehostetes WM-Tippspiel mit **Jokern, geheimen Missionen, Challenges
 
 Eine kompakte Flask-App + SQLite, alles in **einem Docker-Container**. Läuft auf einem Raspberry Pi oder beliebigen Server und lässt sich hinter einen Reverse-Proxy (HTTPS) hängen.
 
-## Screenshots
-
-| Tabelle | Joker | Hilfe |
-|---|---|---|
-| ![Tabelle](docs/table.png) | ![Tippen](docs/joker.png) | ![Hilfe](docs/help.png) |
-
-
-
-
 ## Features
 
 - ⚽ **Tippen** mit Sperre zum Anpfiff, Risiko-Tipp pro Spieltag (×2 / −4)
