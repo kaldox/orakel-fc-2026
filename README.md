@@ -12,7 +12,7 @@ A compact **Flask + SQLite** app, everything in **one Docker container**. Runs o
 
 | Table | Joker | Help |
 |---|---|---|
-| ![Tabelle](docs/Table.png) | ![Tippen](docs/joker.png) | ![Hilfe](docs/help.png) |
+| ![Tabelle](docs/table.png) | ![Tippen](docs/joker.png) | ![Hilfe](docs/help.png) |
 
 
 ## Features
