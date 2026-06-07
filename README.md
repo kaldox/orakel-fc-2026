@@ -8,6 +8,13 @@ A self-hosted **World Cup 2026 prediction game** for your group of friends — w
 
 A compact **Flask + SQLite** app, everything in **one Docker container**. Runs on a Raspberry Pi or any server and sits behind a reverse proxy for HTTPS.
 
+## Screenshots
+
+| Table | Joker | Help |
+|---|---|---|
+| ![Tabelle](docs/Table.png) | ![Tippen](docs/joker.png) | ![Hilfe](docs/help.png) |
+
+
 ## Features
 
 - ⚽ **Predictions** that lock at kickoff, plus one risk pick per matchday (×2 / −4)
