@@ -24,6 +24,11 @@ app = Flask(__name__)
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "change-me-please")
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///" + os.path.join(DATA_DIR, "orakel.db")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+# Gehaertete Session-Cookies. SECURE erst aktivieren, wenn ueber HTTPS betrieben
+# (per .env: COOKIE_SECURE=1) - sonst klappt lokales HTTP-Testen nicht.
+app.config["SESSION_COOKIE_HTTPONLY"] = True
+app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+app.config["SESSION_COOKIE_SECURE"] = os.environ.get("COOKIE_SECURE", "0") == "1"
 LEAGUE_NAME = os.environ.get("LEAGUE_NAME", "ORAKEL FC 2026")
 
 db = SQLAlchemy(app)

@@ -1,0 +1,12 @@
+{
+  "name": "ORAKEL FC 2026",
+  "short_name": "ORAKEL FC",
+  "description": "WM-2026-Tippspiel mit Jokern, Missionen und Live-Tabelle.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0f0d",
+  "theme_color": "#0a0f0d",
+  "icons": [
+    { "src": "/static/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

@@ -1,214 +1,83 @@
+[🇬🇧 English](README.md) · **🇩🇪 [Deutsch](README.de.md)**
+
 # ORAKEL FC 2026 ⚽🔮
 
-Dein selbst gehostetes WM-Tippspiel mit **Jokern, geheimen Missionen, Challenges, Sonderwertungen und Chaos-Events** – und das Beste: Du kannst es jederzeit im Browser mit **neuen Ideen erweitern**, ohne eine Zeile Code anzufassen.
+A self-hosted **World Cup 2026 prediction game** for your group of friends — with **jokers, secret missions, weekly challenges, special awards and chaos events**. The best part: you can keep **adding your own ideas in the browser**, no coding required.
 
-> *Reden ist Silber. Richtig tippen ist Gold. Falsch tippen ist Kaffeeküche.*
+> *Talk is silver. Correct predictions are gold. Wrong ones are kitchen gossip.*
 
-Eine kompakte Flask-App + SQLite, alles in **einem Docker-Container**. Läuft auf einem Raspberry Pi oder beliebigen Server und lässt sich hinter einen Reverse-Proxy (HTTPS) hängen.
+A compact **Flask + SQLite** app, everything in **one Docker container**. Runs on a Raspberry Pi or any server and sits behind a reverse proxy for HTTPS.
 
 ## Features
 
-- ⚽ **Tippen** mit Sperre zum Anpfiff, Risiko-Tipp pro Spieltag (×2 / −4)
-- 🏆 **Live-Tabelle** mit deterministischer Wertung (Tendenz/Differenz/Exakt, K.-o.- und Außenseiter-Bonus)
-- 🃏 **Joker** mit automatischen Effekten (Verdoppeln, Sabotage, Schutzschild, Tausch, …) – frei erweiterbar
-- 🔮 **Geheime Missionen**, 🎯 **Wochen-Challenges**, 🏅 **Sonderwertungen**, 🌀 **Chaos-Events** – alles im Browser editierbar
-- 📱 **Mobil-optimiert**: untere Tab-Leiste, große Buttons, Erstlogin-Tutorial, Hilfe-Seite
-- 🛠️ **Admin-Bereich**: Spieler, Spielplan (inkl. JSON-Import), Ergebnisse, Punkte-Anpassungen, Passwort-Reset
-- 🔒 Sinnvolle Sicherheitsheader, einfache Backups (siehe `BETRIEB.md`)
+- ⚽ **Predictions** that lock at kickoff, plus one risk pick per matchday (×2 / −4)
+- 🏆 **Live standings** with a deterministic scoring engine (tendency / goal difference / exact, knockout & underdog bonus)
+- 🃏 **Jokers** with automatic effects (double, sabotage, shield, swap, …) — fully extensible
+- 🔮 **Secret missions**, 🎯 **weekly challenges**, 🏅 **awards**, 🌀 **chaos events** — all editable in the admin UI
+- 📱 **Mobile-first**: bottom tab bar, large buttons, first-login tutorial, help page, add-to-home-screen
+- 🛠️ **Admin area**: players, fixtures (incl. JSON import), results, manual point adjustments, password reset
+- 🔒 Sensible security headers, hardened session cookies, simple backups (see `BETRIEB.md`, in German)
 
-Ein Helfer-Skript (`wm2026_import.py`) lädt den kompletten WM-2026-Spielplan von [openfootball](https://github.com/openfootball) und erzeugt die Import-Datei.
+A helper script (`wm2026_import.py`) pulls the full WC 2026 fixture list from [openfootball](https://github.com/openfootball) and produces the import file (kickoff times converted to your timezone).
 
 ---
 
-## 1. Schnellstart (Docker)
+## Quickstart (Docker)
 
 ```bash
-# 1. Ins Projektverzeichnis wechseln
-cd orakel-fc
+git clone https://github.com/<your-user>/orakel-fc-2026.git
+cd orakel-fc-2026
 
-# 2. Konfiguration anlegen und anpassen
 cp .env.example .env
-nano .env          # SECRET_KEY + ADMIN_PASSWORD setzen!
+nano .env            # set SECRET_KEY + ADMIN_PASSWORD!
 
-# 3. Starten
 docker compose up -d --build
 ```
 
-Die App lauscht jetzt auf **`127.0.0.1:8090`** (nur lokal – nach außen geht es über nginx, siehe Schritt 3).
+The app then listens on **`127.0.0.1:8090`**. Generate a strong secret with `openssl rand -hex 32`.
 
-Logs ansehen / stoppen:
-```bash
-docker compose logs -f
-docker compose down
-```
+> Just trying it out? Temporarily change the port mapping to `"8090:8090"` to reach it on your LAN at `http://<server-ip>:8090`.
 
-### SECRET_KEY erzeugen
-```bash
-openssl rand -hex 32
-```
+## First login
 
----
+Open `http://<server>:8090/login` and sign in with the credentials from your `.env` (default user `admin`). The admin account does **not** appear in the standings. Under **Admin → Players** create one account (name + password) per participant.
 
-## 2. Erster Login
+## Run it on the internet (HTTPS)
 
-Öffne `http://<pi-ip>:8090/login` (oder gleich deine Domain nach Schritt 3) und melde dich mit den Daten aus deiner `.env` an (Standard: `admin` / dein `ADMIN_PASSWORD`).
+Put a reverse proxy with a Let's Encrypt certificate in front — for example **Nginx Proxy Manager**, **Caddy**, or **nginx + certbot**. A ready nginx server block is included (`orakel-fc.nginx.conf`). A complete, beginner-friendly operations guide (HTTPS, auto-renewal, security headers, backups, updates) is in **`BETRIEB.md`** *(currently German — an English version is planned)*.
 
-Der Admin-Account **spielt selbst nicht mit** (taucht also nicht in der Tabelle auf). Lege im Admin-Bereich unter **Spieler** alle Mitspieler:innen an – jede:r bekommt Name + Passwort.
+## Season workflow
 
----
+1. **Players** – Admin → Players.
+2. **Fixtures** – Admin → Matches: add them one by one or paste a JSON list (`wm2026_import.py` generates it).
+3. **Secret missions** – Admin → Assign missions (each player sees only their own).
+4. Participants **predict** before kickoff; predictions lock automatically.
+5. **Results** – Admin → Matches: enter the score, optionally flag “surprise”/“knockout”. Standings update live.
 
-## 3. Hinter deinen nginx hängen
+## Add your own ideas
 
-Du hast Domain + nginx schon – es fehlt nur ein vhost:
+Jokers, missions, challenges, awards and chaos events are all **editable in the browser** (Admin → catalog pages). Start small and grow over the season. Jokers can carry an automatic effect (`double`, `triple`, `allin`, `lucky`, `sabotage`, `shield`, `swap`) or be `manual` (you award the points via Admin → Adjustments).
 
-```bash
-# 1. In der Datei orakel-fc.nginx.conf die Domain anpassen, dann:
-sudo cp orakel-fc.nginx.conf /etc/nginx/sites-available/orakel-fc
-sudo ln -s /etc/nginx/sites-available/orakel-fc /etc/nginx/sites-enabled/
+## Scoring
 
-# 2. Testen + neu laden
-sudo nginx -t && sudo systemctl reload nginx
+Per prediction: correct tendency **3**, correct goal difference **5**, exact result **8**. Bonuses (only on a correct tendency): knockout **+2**, flagged surprise **+3**. A risk pick (max one per matchday) doubles on a hit, or **−4** on a miss. Missions, challenges, awards and manual adjustments add on top.
 
-# 3. HTTPS holen (certbot ergänzt den 443-Block automatisch)
-sudo certbot --nginx -d orakel.deine-domain.tld
-```
+## Backup & update
 
-DNS-A-Record der Subdomain auf deine IP zeigen lassen (bei dynamischer Heim-IP per DDNS/Domain-API aktuell halten).
+All data lives in a single file: `./data/orakel.db`. See `BETRIEB.md` for a ready-made backup script and the update flow. In short: copy new files in, then `docker compose up -d --build`.
 
----
-
-## 4. Saison-Ablauf
-
-| Schritt | Wo | Was |
-|--------|-----|-----|
-| **Spieler anlegen** | Admin → Spieler | Name + Passwort für jede:n |
-| **Spielplan einlesen** | Admin → Spiele | Spiele einzeln anlegen **oder** als JSON importieren |
-| **Geheime Missionen verteilen** | Admin → Missionen zuweisen | Jede:r kriegt eine – sieht nur die eigene |
-| **Getippt wird** | von den Spieler:innen unter „Tippen" | Sperrt automatisch zum Anpfiff |
-| **Ergebnisse eintragen** | Admin → Spiele | Tor:Tor, ggf. „Überraschung"/„KO" anhaken |
-| **Joker** | Spieler unter „Joker", Admin sieht „Gespielte Joker" | Auto-Effekte rechnen sich selbst |
-| **Sonderfälle** | Admin → Anpassungen | Manueller Bonus/Malus mit Begründung |
-| **Challenge-/Award-Gewinner** | Admin → Katalog | Gewinner:in auswählen, Punkte fließen automatisch |
-
-### Spielplan-Import (JSON)
-Unter *Admin → Spiele* eine Liste einfügen:
-```json
-[
-  {"home":"Mexiko","away":"Polen","kickoff":"2026-06-11T18:00","matchday":"1","stage":"Gruppe A"},
-  {"home":"Kanada","away":"Schweiz","kickoff":"2026-06-12T21:00","matchday":"1","stage":"Gruppe B","knockout":false}
-]
-```
-Pflichtfelder: `home`, `away`, `kickoff` (`YYYY-MM-DDTHH:MM`). Optional: `matchday`, `stage`, `knockout`. Den WM-2026-Spielplan bekommst du z. B. kostenlos und ohne API-Key von **openfootball** (github.com/openfootball) und formst ihn einmalig in dieses Format um.
-
----
-
-## 5. ⭐ Mit eigenen Ideen erweitern (der Clou)
-
-Alle „Kataloge" sind **im Browser editierbar** – kein Deploy nötig. Im Admin-Bereich gibt es je eine Seite zum Anlegen/Bearbeiten/Löschen für:
-
-- **Joker** · **Missionen** · **Challenges** · **Sonderwertungen (Awards)** · **Chaos-Events**
-
-Neue Idee = neuer Eintrag, fertig. Du kannst klein starten und über die Saison immer mehr dazupacken.
-
-### Joker-Auto-Effekte
-Beim Anlegen eines Jokers wählst du ein `auto_effect`. Die App rechnet diese automatisch:
-
-| Effekt | Wirkung |
-|--------|---------|
-| `double` | Verdoppelt die Punkte **eines gewählten Spiels** |
-| `triple` | Verdreifacht **einen ganzen Spieltag** |
-| `allin` | Tagesertrag auf 1 Spiel: Tendenz trifft → ×3, sonst 0 |
-| `lucky` | 0 Punkte an einem Spieltag → trotzdem 3 Trostpunkte |
-| `sabotage` | Halbiert die Tagespunkte eines Gegners |
-| `shield` | Macht einen Spieltag immun gegen Sabotage |
-| `swap` | Schlechtester Spieltag zählt wie der Liga-Durchschnitt |
-| `manual` | Kein Automatismus – du wertest ihn über **Anpassungen** |
-
-Für alles Kreative, das sich nicht automatisieren lässt (Chaos-Joker, Wett-Einsätze, Kaffeeküchen-Bußen): einfach `manual` wählen und die Punkte unter **Admin → Anpassungen** mit Begründung buchen (positiv = Bonus, negativ wie `-4` = Malus).
-
----
-
-## 6. Wertungssystem
-
-**Pro Tipp:**
-- Richtige Tendenz: **3**
-- Richtige Tordifferenz: **5**
-- Exaktes Ergebnis: **8**
-
-**Boni (nur bei richtiger Tendenz):**
-- K.-o.-Spiel: **+2**
-- Als „Überraschung" markiert: **+3**
-
-**Risiko-Tipp** (max. 1 pro Spieltag): richtig → **×2**, falsch → **−4**.
-
-Dazu kommen Missions-, Challenge- und Award-Punkte sowie manuelle Anpassungen. Die Tabelle aktualisiert sich live.
-
----
-
-## 7. Backup & Update
-
-**Alle Daten** liegen in einer einzigen Datei: `./data/orakel.db`.
-```bash
-# Backup
-cp data/orakel.db data/orakel-backup-$(date +%F).db
-```
-
-**Update** (Daten bleiben erhalten, da im Volume):
-```bash
-git pull        # oder neue Dateien einspielen
-docker compose up -d --build
-```
-
----
-
-## 8. Sicherheit
-
-- **`SECRET_KEY`** und **`ADMIN_PASSWORD`** in `.env` unbedingt ändern.
-- Der Container ist an `127.0.0.1` gebunden – von außen nur über nginx + HTTPS erreichbar.
-- Für eine kleine Freundesrunde (5–15 Leute) ist 1 Worker + SQLite ideal. Erst bei sehr vielen gleichzeitigen Schreibzugriffen lohnt ein Umstieg auf Postgres.
-
----
-
-## 9. Tests
+## Tests
 
 ```bash
 python3 -m venv .venv && . .venv/bin/activate
 pip install -r requirements.txt
-python test_scoring.py      # prüft die Wertungs-Engine
+python test_scoring.py
 ```
 
 ---
 
-## Projektstruktur
+## License
 
-```
-orakel-fc/
-├── app.py                  # komplette App (Modelle, Routen, Wertungs-Engine)
-├── templates/              # alle HTML-Seiten
-├── static/style.css        # ORAKEL-Design (dunkel, grün/gold)
-├── requirements.txt
-├── Dockerfile
-├── docker-compose.yml
-├── orakel-fc.nginx.conf    # fertiger nginx-Server-Block
-├── .env.example            # Konfig-Vorlage
-└── test_scoring.py         # Test der Punkteberechnung
-```
+Released under the **MIT License** (see `LICENSE`). Use, modify and share it freely. Pull requests and ideas are welcome.
 
-Viel Spaß – und möge der/die beste Orakel gewinnen. 🏆
-
----
-
-## Lizenz
-
-Veröffentlicht unter der **MIT-Lizenz** (siehe `LICENSE`). Du darfst die Software frei
-nutzen, anpassen und weitergeben. Pull Requests und Ideen sind willkommen.
-
-## Mitwirken / Eigene Instanz
-
-1. Repo klonen, `cp .env.example .env` und Werte setzen (`SECRET_KEY`, `ADMIN_PASSWORD`).
-2. `docker compose up -d --build` – App läuft auf `127.0.0.1:8090`.
-3. Für den Internet-Betrieb einen Reverse-Proxy mit HTTPS davorsetzen (Nginx Proxy Manager,
-   Caddy oder nginx + certbot) – Schritt für Schritt in `BETRIEB.md`.
-
-> Hinweis: `.env` und der `data/`-Ordner (Datenbank) sind in `.gitignore` ausgeschlossen
-> und gehören **nie** ins Repository.
+> Note: `.env` and the `data/` folder (database) are excluded via `.gitignore` and must **never** be committed.

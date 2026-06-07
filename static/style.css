@@ -179,3 +179,15 @@ label{display:block;font-size:12.5px;color:var(--muted);margin:0 0 4px}
   .moresheet a:active{background:var(--surface-2)}
   .moresheet a.logout{color:var(--coral)}
 }
+
+/* ---- Mobile/Web-Feinschliff (iOS/Android) ---- */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+button,a,.bnav{-webkit-tap-highlight-color:rgba(52,232,158,.18)}
+@media(max-width:760px){
+  .btn{min-height:46px}
+  .bnav{min-height:50px}
+  nav.menu a{min-height:40px;display:inline-flex;align-items:center}
+  /* breite Tabellen (Tabelle, Spielplan) horizontal scrollbar statt gequetscht */
+  .card table{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch;white-space:nowrap}
+  th,td{padding:11px 10px}
+}
