@@ -1,0 +1,20 @@
+services:
+  orakel-fc:
+    build: .
+    container_name: orakel-fc
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      # App ist dann auf dem Server unter http://127.0.0.1:8090 erreichbar.
+      # Fuer den Betrieb im Internet einen Reverse-Proxy (HTTPS) davorsetzen –
+      # siehe BETRIEB.md. Wer testweise von aussen drauf will, kann "8090:8090"
+      # nehmen (dann ohne TLS direkt erreichbar – nur zum Ausprobieren).
+      - "127.0.0.1:8090:8090"
+    volumes:
+      - ./data:/app/data
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8090/login')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s

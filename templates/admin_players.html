@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block body %}
+<p class="muted small"><a href="{{ url_for('admin_home') }}">← Admin</a></p>
+<h1>Spieler</h1>
+<div class="card">
+  <h3>Neue:n Spieler:in anlegen</h3>
+  <form method="post">
+    <div class="row">
+      <div class="field"><label>Name</label><input name="name" required></div>
+      <div class="field"><label>Passwort</label><input name="password" required></div>
+      <div class="field" style="flex:0"><label>Admin?</label><div><input type="checkbox" name="is_admin"></div></div>
+      <div class="field" style="flex:0"><label>Spielt mit?</label><div><input type="checkbox" name="plays" checked></div></div>
+    </div>
+    <button class="btn">Anlegen</button>
+  </form>
+</div>
+<div class="card" style="padding:8px">
+  <table>
+    <thead><tr><th>#</th><th>Name</th><th>Rolle</th><th class="r"></th></tr></thead>
+    <tbody>
+    {% for p in players %}
+      <tr><td class="mono muted">{{ p.id }}</td><td><b>{{ p.name }}</b></td>
+        <td>{% if p.is_admin %}<span class="tag gold">Admin</span>{% endif %}{% if p.plays %}<span class="tag green">spielt</span>{% else %}<span class="tag muted">spielt nicht</span>{% endif %}</td>
+        <td class="r" style="white-space:nowrap">
+          <form method="post" style="display:inline-flex;gap:4px;vertical-align:middle">
+            <input type="hidden" name="action" value="resetpw"><input type="hidden" name="id" value="{{ p.id }}">
+            <input type="text" name="password" placeholder="neues Passwort" style="width:130px;padding:5px 8px">
+            <button class="btn sec sm">setzen</button>
+          </form>
+          <form method="post" style="display:inline" onsubmit="return confirm('Spieler löschen?')"><input type="hidden" name="action" value="delete"><input type="hidden" name="id" value="{{ p.id }}"><button class="btn danger sm">×</button></form>
+        </td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

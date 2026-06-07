@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}{{ league_name }}{% endblock %}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Hanken+Grotesk:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+{% set ep = request.endpoint %}
+{% if me %}
+<header class="top"><div class="top-in">
+  <a class="brand" href="{{ url_for('dashboard') }}">ORAKEL <b>FC</b></a>
+  <nav class="menu">
+    <a href="{{ url_for('dashboard') }}">Tabelle</a>
+    <a href="{{ url_for('tips') }}">Tippen</a>
+    <a href="{{ url_for('jokers') }}">Joker</a>
+    <a href="{{ url_for('missions') }}">Missionen</a>
+    <a href="{{ url_for('challenges') }}">Challenges</a>
+    <a href="{{ url_for('awards') }}">Awards</a>
+    <a href="{{ url_for('hilfe') }}">Hilfe</a>
+    {% if me.is_admin %}<a class="admin" href="{{ url_for('admin_home') }}">Admin</a>{% endif %}
+    <a href="{{ url_for('passwort') }}">Passwort</a>
+    <a class="logout" href="{{ url_for('logout') }}">Logout ({{ me.name }})</a>
+  </nav>
+</div></header>
+{% endif %}
+<div class="wrap">
+  {% with msgs = get_flashed_messages(with_categories=true) %}
+    {% for cat, m in msgs %}<div class="flash {{ cat }}">{{ m }}</div>{% endfor %}
+  {% endwith %}
+  {% block body %}{% endblock %}
+</div>
+
+{% if me %}
+<!-- Untere Tab-Leiste (mobil) -->
+<nav class="bottomnav">
+  <a class="bnav {% if ep=='dashboard' %}active{% endif %}" href="{{ url_for('dashboard') }}"><span class="bi">🏆</span>Tabelle</a>
+  <a class="bnav {% if ep=='tips' %}active{% endif %}" href="{{ url_for('tips') }}"><span class="bi">⚽</span>Tippen</a>
+  <a class="bnav {% if ep=='jokers' %}active{% endif %}" href="{{ url_for('jokers') }}"><span class="bi">🃏</span>Joker</a>
+  <a class="bnav {% if ep=='hilfe' %}active{% endif %}" href="{{ url_for('hilfe') }}"><span class="bi">❓</span>Hilfe</a>
+  <button class="bnav" type="button" id="moreBtn" onclick="toggleMore()"><span class="bi">☰</span>Mehr</button>
+</nav>
+<div class="moresheet" id="moresheet">
+  <a href="{{ url_for('missions') }}">🔮 Missionen</a>
+  <a href="{{ url_for('challenges') }}">🎯 Challenges</a>
+  <a href="{{ url_for('awards') }}">🏅 Awards</a>
+  {% if me.is_admin %}<a href="{{ url_for('admin_home') }}">🛠️ Admin</a>{% endif %}
+  <a href="{{ url_for('passwort') }}">🔑 Passwort ändern</a>
+  <a class="logout" href="{{ url_for('logout') }}">🚪 Logout ({{ me.name }})</a>
+</div>
+
+<!-- Tutorial -->
+<div class="modal-overlay" id="tutModal" onclick="if(event.target===this)closeTutorial()">
+  <div class="modal">
+    <h2>So funktioniert's 👋</h2>
+    <p class="muted small" style="margin:0 0 8px">In 30 Sekunden erklärt.</p>
+    <div class="tut-step"><span class="n">1</span><span class="ic">⚽</span><div><b>Spiele tippen</b><span>Unter „Tippen" dein Ergebnis eingeben und speichern. Bis zum Anpfiff kannst du es ändern.</span></div></div>
+    <div class="tut-step"><span class="n">2</span><span class="ic">🎯</span><div><b>Punkte sammeln</b><span>Je genauer dein Tipp, desto mehr Punkte. Das exakte Ergebnis bringt am meisten.</span></div></div>
+    <div class="tut-step"><span class="n">3</span><span class="ic">🃏</span><div><b>Joker einsetzen</b><span>Joker bringen Extra-Vorteile – jeder nur einmal. Das ℹ️ neben jedem Joker erklärt, was er macht.</span></div></div>
+    <div class="tut-step"><span class="n">4</span><span class="ic">🏆</span><div><b>Rangliste</b><span>Unter „Tabelle" siehst du jederzeit deinen aktuellen Platz.</span></div></div>
+    <div style="display:flex;gap:8px;margin-top:16px">
+      <button class="btn" style="flex:1" onclick="closeTutorial()">Los geht's!</button>
+      <a class="btn sec" href="{{ url_for('hilfe') }}" onclick="closeTutorial()">Mehr Hilfe</a>
+    </div>
+  </div>
+</div>
+
+<script>
+function toggleMore(){document.getElementById('moresheet').classList.toggle('show');}
+function openTutorial(){document.getElementById('tutModal').classList.add('show');}
+function closeTutorial(){document.getElementById('tutModal').classList.remove('show');try{localStorage.setItem('ofc_tut_seen','1');}catch(e){}}
+function toggleInfo(id){var el=document.getElementById(id);if(el)el.classList.toggle('show');}
+document.addEventListener('click',function(e){
+  var sheet=document.getElementById('moresheet');var btn=document.getElementById('moreBtn');
+  if(sheet&&sheet.classList.contains('show')&&!sheet.contains(e.target)&&btn&&!btn.contains(e.target)){
+    sheet.classList.remove('show');
+  }
+});
+{% if ep == 'dashboard' %}
+try{if(!localStorage.getItem('ofc_tut_seen')){openTutorial();}}catch(e){}
+{% endif %}
+</script>
+{% endif %}
+</body>
+</html>

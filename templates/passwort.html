@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block body %}
+<h1>Passwort ändern</h1>
+<p class="sub">Wähle ein neues Passwort für deinen Zugang (mindestens 6 Zeichen).</p>
+
+<div class="card" style="max-width:440px">
+  <form method="post">
+    <div class="field">
+      <label>Aktuelles Passwort</label>
+      <input type="password" name="current" autocomplete="current-password" required>
+    </div>
+    <div class="field">
+      <label>Neues Passwort</label>
+      <input type="password" name="new" autocomplete="new-password" minlength="6" required>
+    </div>
+    <div class="field">
+      <label>Neues Passwort wiederholen</label>
+      <input type="password" name="confirm" autocomplete="new-password" minlength="6" required>
+    </div>
+    <button class="btn" style="width:100%">Passwort speichern</button>
+  </form>
+</div>
+
+<p class="muted small" style="max-width:440px">Passwort vergessen? Melde dich bei der Spielleitung – sie kann dir ein neues setzen.</p>
+{% endblock %}

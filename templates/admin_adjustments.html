@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block body %}
+<p class="muted small"><a href="{{ url_for('admin_home') }}">← Admin</a></p>
+<h1>Punkte-Anpassungen</h1>
+<p class="sub">Universeller Bonus/Malus für alles, was nicht automatisch berechnet wird: manuelle Joker-Effekte, Chaos-Strafen, Wett-Einsätze, Kaffeeküchen-Bußen.</p>
+
+<div class="callout">Positive Zahl = Bonus, negative Zahl = Malus (z.&nbsp;B. <span class="mono">-4</span>). „Spieltag" ist optional und nur zur Doku – die Punkte zählen immer zur Gesamtwertung.</div>
+
+<div class="card">
+  <h3>Neue Anpassung</h3>
+  <form method="post">
+    <div class="row">
+      <div class="field"><label>Spieler:in</label>
+        <select name="player_id" required>
+          {% for p in players %}<option value="{{ p.id }}">{{ p.name }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="field" style="flex:0;min-width:110px"><label>Punkte (±)</label><input name="points" inputmode="numeric" placeholder="z.B. 3 oder -4" required></div>
+      <div class="field" style="flex:0;min-width:110px"><label>Spieltag</label><input name="matchday" placeholder="optional"></div>
+      <div class="field"><label>Grund</label><input name="reason" placeholder="z.B. Joker „Sabotage" gegen Tom"></div>
+      <div class="field" style="flex:0;align-self:flex-end"><button class="btn">Buchen</button></div>
+    </div>
+  </form>
+</div>
+
+<div class="card" style="padding:8px">
+  <table>
+    <thead><tr><th>Spieler:in</th><th>Punkte</th><th>Spieltag</th><th>Grund</th><th class="r"></th></tr></thead>
+    <tbody>
+    {% for a in items %}
+      <tr>
+        <td><b>{{ pmap.get(a.player_id, '?') }}</b></td>
+        <td class="mono {% if a.points > 0 %}delta-pos{% elif a.points < 0 %}delta-neg{% else %}delta-zero{% endif %}">{{ '+' if a.points > 0 }}{{ a.points }}</td>
+        <td class="mono muted">{{ a.matchday or '—' }}</td>
+        <td class="small">{{ a.reason or '—' }}</td>
+        <td class="r"><form method="post" onsubmit="return confirm('Anpassung löschen?')"><input type="hidden" name="action" value="delete"><input type="hidden" name="id" value="{{ a.id }}"><button class="btn danger sm">×</button></form></td>
+      </tr>
+    {% endfor %}
+    {% if not items %}<tr><td colspan="5" class="muted small">Noch keine Anpassungen.</td></tr>{% endif %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

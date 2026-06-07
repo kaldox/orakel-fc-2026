@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block body %}
+<h1>Wochen-Challenges</h1>
+<p class="sub">Jede Woche eine Zusatzwette für alle. Die Spielleitung trägt den Gewinner ein.</p>
+<div class="grid g2">
+{% for c in items %}
+  <div class="tile">
+    <p class="nm">{{ c.title }}<span class="tag muted" style="margin-left:auto">{{ c.week }}</span></p>
+    <p class="ds">{{ c.description }}</p>
+    <div style="margin-top:8px">
+      <span class="tag green">{{ c.points }} Punkte</span>
+      {% if c.winner_player_id %}<span class="tag gold">Sieger: {{ pmap.get(c.winner_player_id, '?') }}</span>{% else %}<span class="tag muted">offen</span>{% endif %}
+    </div>
+  </div>
+{% endfor %}
+</div>
+{% endblock %}

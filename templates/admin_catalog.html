@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block body %}
+<p class="muted small"><a href="{{ url_for('admin_home') }}">← Admin</a></p>
+<h1>{{ cfg.title }}</h1>
+<p class="sub">Neue Ideen einfach unten hinzufügen – die Liste wächst mit.</p>
+
+<div class="card">
+  <h3>{% if edit %}Bearbeiten (#{{ edit.id }}){% else %}Neu anlegen{% endif %}</h3>
+  <form method="post">
+    {% if edit %}<input type="hidden" name="id" value="{{ edit.id }}">{% endif %}
+    <div class="row">
+    {% for f in cfg.fields %}
+      {% set fname=f[0] %}{% set flabel=f[1] %}{% set ftype=f[2] %}
+      {% set val = (edit[fname] if edit else '') %}
+      <div class="field" {% if ftype=='textarea' %}style="flex-basis:100%"{% endif %}>
+        <label>{{ flabel }}</label>
+        {% if ftype=='text' %}<input name="{{ fname }}" value="{{ val }}">
+        {% elif ftype=='number' %}<input type="number" name="{{ fname }}" value="{{ val if val != '' else 0 }}">
+        {% elif ftype=='textarea' %}<textarea name="{{ fname }}">{{ val }}</textarea>
+        {% elif ftype=='bool' %}<div><input type="checkbox" name="{{ fname }}" {% if (edit and val) or (not edit and fname=='active') %}checked{% endif %}></div>
+        {% elif ftype=='select' %}<select name="{{ fname }}">{% for opt,lab in f[3] %}<option value="{{ opt }}" {% if val==opt %}selected{% endif %}>{{ lab }}</option>{% endfor %}</select>
+        {% endif %}
+      </div>
+    {% endfor %}
+    </div>
+    <button class="btn">{% if edit %}Aktualisieren{% else %}Hinzufügen{% endif %}</button>
+    {% if edit %}<a class="btn sec" href="{{ url_for('admin_catalog', kind=kind) }}">Abbrechen</a>{% endif %}
+  </form>
+</div>
+
+<div class="card" style="padding:8px">
+  <table>
+    <thead><tr><th>#</th><th>Eintrag</th><th>Details</th><th class="r">Aktionen</th></tr></thead>
+    <tbody>
+    {% for it in items %}
+      <tr>
+        <td class="mono muted">{{ it.id }}</td>
+        <td><b>{% if it.emoji is defined %}{{ it.emoji }} {% endif %}{{ it.name if it.name is defined else it.title }}</b>
+            {% if it.week is defined %}<br><span class="small muted">{{ it.week }}</span>{% endif %}</td>
+        <td class="small muted">
+          {{ (it.description or '')[:80] }}
+          {% if it.points is defined %}<br><span class="tag green">{{ it.points }} P</span>{% endif %}
+          {% if it.auto_effect is defined %}<span class="tag muted">{{ it.auto_effect }}</span><span class="tag muted">max {{ it.max_per_player }}</span>{% endif %}
+          {% if it.active is defined and not it.active %}<span class="tag coral">inaktiv</span>{% endif %}
+        </td>
+        <td class="r" style="white-space:nowrap">
+          {% if kind in ['challenges','awards'] %}
+            <form method="post" action="{{ url_for('admin_winner', kind=kind, oid=it.id) }}" style="display:inline-flex;gap:4px">
+              <select name="winner_player_id" class="sm" style="width:auto;padding:4px">
+                <option value="">– Sieger –</option>
+                {% for p in players %}<option value="{{ p.id }}" {% if it.winner_player_id==p.id %}selected{% endif %}>{{ p.name }}</option>{% endfor %}
+              </select><button class="btn gold sm">setzen</button>
+            </form>
+          {% endif %}
+          {% if kind=='chaos' %}
+            <form method="post" action="{{ url_for('admin_chaos_toggle', cid=it.id) }}" style="display:inline"><button class="btn sm {% if it.active %}gold{% else %}sec{% endif %}">{% if it.active %}aktiv ✓{% else %}aktivieren{% endif %}</button></form>
+          {% endif %}
+          <a class="btn sec sm" href="{{ url_for('admin_catalog', kind=kind, edit=it.id) }}">edit</a>
+          <form method="post" style="display:inline" onsubmit="return confirm('Löschen?')"><input type="hidden" name="action" value="delete"><input type="hidden" name="id" value="{{ it.id }}"><button class="btn danger sm">×</button></form>
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

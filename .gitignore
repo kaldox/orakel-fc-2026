@@ -1,0 +1,23 @@
+# Laufzeit-Daten & Secrets – NIEMALS committen
+.env
+data/
+*.db
+*.sqlite
+*.sqlite3
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+
+# Build / Tooling
+*.log
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/

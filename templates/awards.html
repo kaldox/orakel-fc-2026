@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block body %}
+<h1>Sonderwertungen</h1>
+<p class="sub">Die Ehrentitel – werden meist erst beim Finale vergeben.</p>
+<div class="grid g2">
+{% for a in items %}
+  <div class="tile">
+    <p class="nm"><span class="badge-emoji">{{ a.emoji }}</span> {{ a.name }}</p>
+    <p class="ds">{{ a.description }}</p>
+    {% if a.winner_player_id %}<span class="tag gold" style="margin-top:8px">🏆 {{ pmap.get(a.winner_player_id,'?') }}</span>{% endif %}
+  </div>
+{% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block body %}
+<h1>Admin · Spielleitung</h1>
+<p class="sub">Hier steuerst du alles. Alle Listen sind erweiterbar – einfach neue Einträge anlegen.</p>
+
+<div class="grid g3" style="margin-bottom:10px">
+  <div class="tile"><p class="nm">{{ stats.players }}</p><p class="ds">Mitspielende</p></div>
+  <div class="tile"><p class="nm">{{ stats.finished }} / {{ stats.matches }}</p><p class="ds">Spiele gewertet</p></div>
+  <div class="tile"><p class="nm">{{ stats.jokers }} · {{ stats.missions }}</p><p class="ds">Joker · Missionen</p></div>
+</div>
+
+<h2>Setup &amp; Steuerung</h2>
+<div class="grid g3">
+  <a class="tile" href="{{ url_for('admin_players') }}"><p class="nm">👥 Spieler</p><p class="ds">Mitspielende anlegen, Passwörter setzen.</p></a>
+  <a class="tile" href="{{ url_for('admin_matches') }}"><p class="nm">⚽ Spiele &amp; Ergebnisse</p><p class="ds">Spielplan pflegen, Resultate eintragen, Import.</p></a>
+  <a class="tile" href="{{ url_for('admin_assign') }}"><p class="nm">🔮 Missionen zuweisen</p><p class="ds">Geheime Missionen verteilen, als erfüllt markieren.</p></a>
+  <a class="tile" href="{{ url_for('admin_jokerplays') }}"><p class="nm">🃏 Gespielte Joker</p><p class="ds">Übersicht aller gezündeten Joker.</p></a>
+  <a class="tile" href="{{ url_for('admin_adjustments') }}"><p class="nm">± Punkte-Anpassungen</p><p class="ds">Bonus/Strafe für Chaos &amp; manuelle Joker.</p></a>
+</div>
+
+<h2>Kataloge (frei erweiterbar)</h2>
+<div class="grid g3">
+  {% for kind, c in catalogs.items() %}
+  <a class="tile" href="{{ url_for('admin_catalog', kind=kind) }}"><p class="nm">{{ c.title }}</p><p class="ds">Einträge anlegen, bearbeiten, löschen.</p></a>
+  {% endfor %}
+</div>
+{% endblock %}
