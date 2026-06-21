@@ -11,7 +11,7 @@
 ![Self-hosted](https://img.shields.io/badge/self--hosted-%E2%9C%93-success)
 ![UI](https://img.shields.io/badge/UI-EN%20%2F%20DE-informational)
 
-[🇩🇪 Deutsch](README.md) · **🇬🇧 English**
+[🇩🇪 Deutsch](README.md) · **🇬🇧 English** · [🟥⚫ Baseldütsch](README.bl.md)
 
 </div>
 
@@ -71,40 +71,159 @@ Open `http://<server>:8090/login` and sign in with the credentials from your `.e
 
 ## Run it on the internet (HTTPS)
 
-Put a reverse proxy with a Let's Encrypt certificate in front — for example **Nginx Proxy Manager**, **Caddy**, or **nginx + certbot**. A ready nginx server block is included (`orakel-fc.nginx.conf`). A complete, beginner-friendly operations guide (HTTPS, auto-renewal, security headers, backups, updates) is in **`BETRIEB.md`** *(currently German — an English version is planned)*.
+You already have a domain and nginx — you just need a vhost:
+
+```bash
+# 1. Edit orakel-fc.nginx.conf to use your domain, then:
+sudo cp orakel-fc.nginx.conf /etc/nginx/sites-available/orakel-fc
+sudo ln -s /etc/nginx/sites-available/orakel-fc /etc/nginx/sites-enabled/
+
+# 2. Test and reload
+sudo nginx -t && sudo systemctl reload nginx
+
+# 3. Get HTTPS (certbot adds the 443 block automatically)
+sudo certbot --nginx -d orakel.your-domain.tld
+```
+
+Point the subdomain's DNS A record at your server's IP (use DDNS/your domain provider's API if your home IP is dynamic).
+
+Prefer a different reverse proxy? **Nginx Proxy Manager** or **Caddy** work just as well — the container only needs to be reachable from whatever sits in front of it. A complete, beginner-friendly operations guide (HTTPS, auto-renewal, security headers, backups, updates) is in **`BETRIEB.md`** *(currently German — an English version is planned)*.
 
 ## Season workflow
 
-1. **Players** – Admin → Players.
-2. **Fixtures** – Admin → Matches: add them one by one or paste a JSON list (`wm2026_import.py` generates it).
-3. **Secret missions** – Admin → Assign missions (each player sees only their own).
-4. Participants **predict** before kickoff; predictions lock automatically.
-5. **Results** – Admin → Matches: enter the score, optionally flag “surprise”/“knockout”. Standings update live.
+| Step | Where | What |
+|--------|-----|-----|
+| **Create players** | Admin → Players | Name + password for each participant |
+| **Enter the fixtures** | Admin → Matches | Add matches one by one **or** import as JSON |
+| **Assign secret missions** | Admin → Assign missions | Each player gets one — only they can see it |
+| **Predictions** | Players, under "Predict" | Locks automatically at kickoff |
+| **Enter results** | Admin → Matches | Score, optionally flag "surprise"/"knockout" |
+| **Jokers** | Players under "Jokers", admin sees "Joker plays" | Automatic effects calculate themselves |
+| **Special cases** | Admin → Adjustments | Manual bonus/malus with a reason |
+| **Challenge/award winners** | Admin → Catalog | Pick a winner, points are added automatically |
 
-## Add your own ideas
+### Fixture import (JSON)
+Paste a list under *Admin → Matches*:
+```json
+[
+  {"home":"Mexico","away":"Poland","kickoff":"2026-06-11T18:00","matchday":"1","stage":"Group A"},
+  {"home":"Canada","away":"Switzerland","kickoff":"2026-06-12T21:00","matchday":"1","stage":"Group B","knockout":false}
+]
+```
+Required: `home`, `away`, `kickoff` (`YYYY-MM-DDTHH:MM`). Optional: `matchday`, `stage`, `knockout`. The full WC 2026 fixture list is available for free, no API key needed, from **openfootball** (github.com/openfootball) — convert it into this format once with `wm2026_import.py`.
 
-Jokers, missions, challenges, awards and chaos events are all **editable in the browser** (Admin → catalog pages). Start small and grow over the season. Jokers can carry an automatic effect (`double`, `triple`, `allin`, `lucky`, `sabotage`, `shield`, `swap`) or be `manual` (you award the points via Admin → Adjustments).
+## ⭐ Add your own ideas (the whole point)
+
+All "catalogs" are **editable in the browser** — no deploy needed. The admin area has a dedicated page to create/edit/delete:
+
+- **Jokers** · **Missions** · **Challenges** · **Awards** · **Chaos events**
+
+A new idea is just a new entry. Start small and keep adding more over the season.
+
+### Joker auto-effects
+When creating a joker you pick an `auto_effect`. The app calculates these automatically:
+
+| Effect | Result |
+|--------|---------|
+| `double` | Doubles the points from **one chosen match** |
+| `triple` | Triples **an entire matchday** |
+| `allin` | All-in on one match: tendency correct → ×3 for the day, otherwise 0 |
+| `lucky` | 0 points on a matchday → 3 consolation points anyway |
+| `sabotage` | Halves an opponent's points for one matchday |
+| `shield` | Makes a matchday immune to sabotage |
+| `swap` | Worst matchday is replaced by the league average |
+| `manual` | No automation — you score it yourself via **Adjustments** |
+
+For anything creative that can't be automated (chaos jokers, side bets, water-cooler forfeits): just pick `manual` and book the points under **Admin → Adjustments** with a reason (positive = bonus, negative like `-4` = penalty).
 
 ## Scoring
 
-Per prediction: correct tendency **3**, correct goal difference **5**, exact result **8**. Bonuses (only on a correct tendency): knockout **+2**, flagged surprise **+3**. A risk pick (max one per matchday) doubles on a hit, or **−4** on a miss. Missions, challenges, awards and manual adjustments add on top.
+**Per prediction:**
+- Correct tendency: **3**
+- Correct goal difference: **5**
+- Exact result: **8**
+
+**Bonuses (only on a correct tendency):**
+- Knockout match: **+2**
+- Flagged "surprise": **+3**
+
+**Risk pick** (max one per matchday): correct → **×2**, wrong → **−4**.
+
+Mission, challenge and award points plus manual adjustments are added on top. Standings update live.
 
 ## Backup & update
 
-All data lives in a single file: `./data/orakel.db`. See `BETRIEB.md` for a ready-made backup script and the update flow. In short: copy new files in, then `docker compose up -d --build`.
+All data lives in a single file: `./data/orakel.db`.
+```bash
+# Backup
+cp data/orakel.db data/orakel-backup-$(date +%F).db
+```
+
+**Update** (data is preserved — it lives in a volume):
+```bash
+git pull        # or copy in the new files
+docker compose up -d --build
+```
+
+See `BETRIEB.md` for a ready-made backup script and a more detailed update flow.
+
+## Security
+
+- Make sure to change **`SECRET_KEY`** and **`ADMIN_PASSWORD`** in `.env` — the app refuses to start without a `SECRET_KEY`.
+- The container binds to `127.0.0.1` — only reachable from outside via your reverse proxy + HTTPS.
+- For a small group of friends (5–15 people), 1 worker + SQLite is plenty. Only consider Postgres if you expect heavy concurrent writes.
 
 ## Tests
 
 ```bash
 python3 -m venv .venv && . .venv/bin/activate
 pip install -r requirements.txt
-python test_scoring.py
+pip install pytest
+python3 -m pytest tests/      # 52 tests: scoring engine, login/brute-force/open-redirect, routes
 ```
+
+---
+
+## Project structure
+
+```
+orakel-fc/
+├── app.py                  # app setup: config, extensions, blueprint registration
+├── extensions.py           # db, csrf (Flask extension instances)
+├── models.py                # SQLAlchemy models (Player, Match, Tip, Joker, …)
+├── auth.py                  # login, brute-force protection, open-redirect protection, decorators
+├── scoring.py                # scoring engine (point calculation, standings)
+├── settings.py                # key/value settings (e.g. plain-mode switch)
+├── security.py                # HTTP security headers
+├── i18n_helpers.py            # language-selection logic (uses i18n.py)
+├── i18n.py                    # translation table (German → English)
+├── catalog_config.py          # shared config for joker effects & admin catalogs
+├── routes/
+│   ├── public.py            # player-facing routes (predict, jokers, standings, …)
+│   └── admin.py              # admin routes (players, fixtures, catalogs, adjustments)
+├── templates/              # all HTML pages
+├── static/style.css        # ORAKEL theme (dark, green/gold)
+├── tests/                    # pytest suite (scoring, auth, routes)
+├── requirements.txt
+├── Dockerfile
+├── docker-compose.yml
+├── orakel-fc.nginx.conf    # ready-made nginx server block
+└── .env.example            # config template
+```
+
+Have fun — and may the best oracle win. 🏆
 
 ---
 
 ## License
 
 Released under the **MIT License** (see `LICENSE`). Use, modify and share it freely. Pull requests and ideas are welcome.
+
+## Contributing / running your own instance
+
+1. Clone the repo, `cp .env.example .env` and set the values (`SECRET_KEY`, `ADMIN_PASSWORD`).
+2. `docker compose up -d --build` — the app runs on `127.0.0.1:8090`.
+3. For internet use, put a reverse proxy with HTTPS in front (Nginx Proxy Manager,
+   Caddy, or nginx + certbot) — step by step in `BETRIEB.md`.
 
 > Note: `.env` and the `data/` folder (database) are excluded via `.gitignore` and must **never** be committed.

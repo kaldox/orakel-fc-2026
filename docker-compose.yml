@@ -12,9 +12,21 @@ services:
       - "127.0.0.1:8090:8090"
     volumes:
       - ./data:/app/data
+    networks:
+      # default: eigenes, isoliertes Netzwerk (Docker Compose legt es automatisch an).
+      # proxy: externes Netzwerk, in dem auch der Reverse-Proxy (z. B. Nginx Proxy
+      #        Manager) haengt - noetig, damit der Proxy den Container ueber seinen
+      #        Containernamen erreichen kann. Muss vorher existieren
+      #        (z. B. `docker network create proxy`, falls noch nicht vorhanden).
+      - default
+      - proxy
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8090/login')"]
       interval: 30s
       timeout: 5s
       retries: 3
       start_period: 10s
+
+networks:
+  proxy:
+    external: true

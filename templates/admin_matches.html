@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block body %}
-<p class="muted small"><a href="{{ url_for('admin_home') }}">← {{ t("Admin") }}</a></p>
+<p class="muted small"><a href="{{ url_for('admin.admin_home') }}">← {{ t("Admin") }}</a></p>
 <h1>{{ t("Spiele & Ergebnisse") }}</h1>
 <p class="sub">{{ t("Spiele anlegen, Resultate eintragen, Überraschungen markieren. Tipps werden automatisch zum Anpfiff gesperrt.") }}</p>
 
@@ -21,7 +21,7 @@
       <div class="field"><label>{{ t("Anpfiff") }}</label><input type="datetime-local" name="kickoff" required value="{{ edit.kickoff.strftime('%Y-%m-%dT%H:%M') }}"></div>
       <div class="field" style="flex:0"><label>{{ t("K.o.-Spiel?") }}</label><div><input type="checkbox" name="is_knockout" {% if edit.is_knockout %}checked{% endif %}></div></div>
       <div class="field" style="flex:0;align-self:flex-end"><button class="btn gold">{{ t("Aktualisieren") }}</button></div>
-      <div class="field" style="flex:0;align-self:flex-end"><a class="btn sec" href="{{ url_for('admin_matches') }}">{{ t("Abbrechen") }}</a></div>
+      <div class="field" style="flex:0;align-self:flex-end"><a class="btn sec" href="{{ url_for('admin.admin_matches') }}">{{ t("Abbrechen") }}</a></div>
     </div>
   </form>
 </div>
@@ -48,7 +48,7 @@
 <div class="card">
   <h3>{{ t("Spiele importieren (JSON)") }}</h3>
   <p class="muted small">{{ t("Liste von Objekten mit home, away, kickoff (Format 2026-06-11T18:00) sowie optional matchday, stage, knockout. Praktisch für den ganzen Spielplan auf einmal (z. B. aus openfootball).") }}</p>
-  <form method="post" action="{{ url_for('admin_matches_import') }}">
+  <form method="post" action="{{ url_for('admin.admin_matches_import') }}">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <div class="field"><textarea name="payload" placeholder='[
   {"home":"Mexiko","away":"Polen","kickoff":"2026-06-11T18:00","matchday":"1","stage":"Gruppe A"},
@@ -71,7 +71,7 @@
           {% if m.surprise %}<span class="tag coral">{{ t("Überraschung") }}</span>{% endif %}</td>
         <td class="kickoff">{{ m.kickoff.strftime('%d.%m. %H:%M') }}</td>
         <td>
-          <form method="post" action="{{ url_for('admin_result', mid=m.id) }}" style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+          <form method="post" action="{{ url_for('admin.admin_result', mid=m.id) }}" style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <input class="score-in" name="home_goals" inputmode="numeric" value="{{ m.home_goals if m.home_goals is not none else '' }}">
             <span class="mono">:</span>
@@ -82,7 +82,7 @@
             {% if m.finished %}<span class="done small">✓</span>{% endif %}
           </form>
         </td>
-        <td class="r" style="white-space:nowrap"><a class="btn sec sm" href="{{ url_for('admin_matches', edit=m.id) }}#editform">edit</a>
+        <td class="r" style="white-space:nowrap"><a class="btn sec sm" href="{{ url_for('admin.admin_matches', edit=m.id) }}#editform">edit</a>
           <form method="post" style="display:inline" onsubmit="return confirm('{{ t('Spiel inkl. Tipps löschen?') }}')">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="action" value="delete"><input type="hidden" name="id" value="{{ m.id }}"><button class="btn danger sm">×</button></form></td>
       </tr>

@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block body %}
-<p class="muted small"><a href="{{ url_for('admin_home') }}">← {{ t("Admin") }}</a></p>
+<p class="muted small"><a href="{{ url_for('admin.admin_home') }}">← {{ t("Admin") }}</a></p>
 <h1>{{ t(cfg.title) }}</h1>
 <p class="sub">{{ t("Neue Ideen einfach unten hinzufügen – die Liste wächst mit.") }}</p>
 
@@ -25,7 +25,7 @@
     {% endfor %}
     </div>
     <button class="btn">{% if edit %}{{ t("Aktualisieren") }}{% else %}{{ t("Hinzufügen") }}{% endif %}</button>
-    {% if edit %}<a class="btn sec" href="{{ url_for('admin_catalog', kind=kind) }}">{{ t("Abbrechen") }}</a>{% endif %}
+    {% if edit %}<a class="btn sec" href="{{ url_for('admin.admin_catalog', kind=kind) }}">{{ t("Abbrechen") }}</a>{% endif %}
   </form>
 </div>
 
@@ -46,7 +46,7 @@
         </td>
         <td class="r" style="white-space:nowrap">
           {% if kind in ['challenges','awards'] %}
-            <form method="post" action="{{ url_for('admin_winner', kind=kind, oid=it.id) }}" style="display:inline-flex;gap:4px">
+            <form method="post" action="{{ url_for('admin.admin_winner', kind=kind, oid=it.id) }}" style="display:inline-flex;gap:4px">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
               <select name="winner_player_id" class="sm" style="width:auto;padding:4px">
                 <option value="">{{ t("– Sieger –") }}</option>
@@ -55,10 +55,10 @@
             </form>
           {% endif %}
           {% if kind=='chaos' %}
-            <form method="post" action="{{ url_for('admin_chaos_toggle', cid=it.id) }}" style="display:inline">
+            <form method="post" action="{{ url_for('admin.admin_chaos_toggle', cid=it.id) }}" style="display:inline">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn sm {% if it.active %}gold{% else %}sec{% endif %}">{% if it.active %}{{ t("aktiv ✓") }}{% else %}{{ t("aktivieren") }}{% endif %}</button></form>
           {% endif %}
-          <a class="btn sec sm" href="{{ url_for('admin_catalog', kind=kind, edit=it.id) }}">edit</a>
+          <a class="btn sec sm" href="{{ url_for('admin.admin_catalog', kind=kind, edit=it.id) }}">edit</a>
           <form method="post" style="display:inline" onsubmit="return confirm('{{ t('Löschen?') }}')">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="action" value="delete"><input type="hidden" name="id" value="{{ it.id }}"><button class="btn danger sm">×</button></form>
         </td>

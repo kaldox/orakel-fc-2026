@@ -6,14 +6,14 @@
   <h3>{{ t("Spielmodus") }}</h3>
   {% if simple_mode %}
   <p class="muted small">{{ t("Aktuell:") }} <b>{{ t("Nur Tippspiel") }}</b> — {{ t("Nur Tippspiel: Diese Extras sind ausgeblendet – es zählen nur die Tipps und die Tabelle.") }}</p>
-  <form method="post" action="{{ url_for('admin_mode') }}">
+  <form method="post" action="{{ url_for('admin.admin_mode') }}">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <input type="hidden" name="simple" value="0">
     <button class="btn gold">{{ t("Auf „Voller Modus“ umstellen") }}</button>
   </form>
   {% else %}
   <p class="muted small">{{ t("Aktuell:") }} <b>{{ t("Voller Modus") }}</b> — {{ t("Voller Modus mit Jokern, Missionen, Challenges, Awards & Chaos-Events.") }}</p>
-  <form method="post" action="{{ url_for('admin_mode') }}">
+  <form method="post" action="{{ url_for('admin.admin_mode') }}">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <input type="hidden" name="simple" value="1">
     <button class="btn sec">{{ t("Auf „Nur Tippspiel“ umstellen") }}</button>
@@ -29,20 +29,20 @@
 
 <h2>{{ t("Setup & Steuerung") }}</h2>
 <div class="grid g3">
-  <a class="tile" href="{{ url_for('admin_players') }}"><p class="nm">👥 {{ t("Spieler") }}</p><p class="ds">{{ t("Mitspielende anlegen, Passwörter setzen.") }}</p></a>
-  <a class="tile" href="{{ url_for('admin_matches') }}"><p class="nm">⚽ {{ t("Spiele & Ergebnisse") }}</p><p class="ds">{{ t("Spielplan pflegen, Resultate eintragen, Import.") }}</p></a>
+  <a class="tile" href="{{ url_for('admin.admin_players') }}"><p class="nm">👥 {{ t("Spieler") }}</p><p class="ds">{{ t("Mitspielende anlegen, Passwörter setzen.") }}</p></a>
+  <a class="tile" href="{{ url_for('admin.admin_matches') }}"><p class="nm">⚽ {{ t("Spiele & Ergebnisse") }}</p><p class="ds">{{ t("Spielplan pflegen, Resultate eintragen, Import.") }}</p></a>
   {% if not simple_mode %}
-  <a class="tile" href="{{ url_for('admin_assign') }}"><p class="nm">🔮 {{ t("Missionen zuweisen") }}</p><p class="ds">{{ t("Geheime Missionen verteilen, als erfüllt markieren.") }}</p></a>
-  <a class="tile" href="{{ url_for('admin_jokerplays') }}"><p class="nm">🃏 {{ t("Gespielte Joker") }}</p><p class="ds">{{ t("Übersicht aller gezündeten Joker.") }}</p></a>
+  <a class="tile" href="{{ url_for('admin.admin_assign') }}"><p class="nm">🔮 {{ t("Missionen zuweisen") }}</p><p class="ds">{{ t("Geheime Missionen verteilen, als erfüllt markieren.") }}</p></a>
+  <a class="tile" href="{{ url_for('admin.admin_jokerplays') }}"><p class="nm">🃏 {{ t("Gespielte Joker") }}</p><p class="ds">{{ t("Übersicht aller gezündeten Joker.") }}</p></a>
   {% endif %}
-  <a class="tile" href="{{ url_for('admin_adjustments') }}"><p class="nm">± {{ t("Punkte-Anpassungen") }}</p><p class="ds">{{ t("Bonus/Strafe für Chaos & manuelle Joker.") }}</p></a>
+  <a class="tile" href="{{ url_for('admin.admin_adjustments') }}"><p class="nm">± {{ t("Punkte-Anpassungen") }}</p><p class="ds">{{ t("Bonus/Strafe für Chaos & manuelle Joker.") }}</p></a>
 </div>
 
 {% if not simple_mode %}
 <h2>{{ t("Kataloge (frei erweiterbar)") }}</h2>
 <div class="grid g3">
   {% for kind, c in catalogs.items() %}
-  <a class="tile" href="{{ url_for('admin_catalog', kind=kind) }}"><p class="nm">{{ t(c.title) }}</p><p class="ds">{{ t("Einträge anlegen, bearbeiten, löschen.") }}</p></a>
+  <a class="tile" href="{{ url_for('admin.admin_catalog', kind=kind) }}"><p class="nm">{{ t(c.title) }}</p><p class="ds">{{ t("Einträge anlegen, bearbeiten, löschen.") }}</p></a>
   {% endfor %}
 </div>
 {% endif %}

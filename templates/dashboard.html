@@ -5,7 +5,7 @@
   <p>{{ t("Hier gibst du deine Tipps für die kommenden Spiele ab und kämpfst mit deinen Freunden um den Sieg. Wenn du neu bist, schau dir kurz die Einführung an.") }}</p>
   <div class="help-strip">
     <button class="btn" onclick="openTutorial()">📖 {{ t("Kurze Einführung") }}</button>
-    <a class="btn sec" href="{{ url_for('tips') }}">⚽ {{ t("Jetzt tippen") }}</a>
+    <a class="btn sec" href="{{ url_for('public.tips') }}">⚽ {{ t("Jetzt tippen") }}</a>
   </div>
 </div>
 
@@ -77,7 +77,7 @@
         {% endfor %}
       </div>
     {% else %}
-      <div class="card muted">{{ t("Noch keinen Joker gespielt.") }} <a href="{{ url_for('jokers') }}">{{ t("Joker ansehen →") }}</a></div>
+      <div class="card muted">{{ t("Noch keinen Joker gespielt.") }} <a href="{{ url_for('public.jokers') }}">{{ t("Joker ansehen →") }}</a></div>
     {% endif %}
   </div>
 </div>

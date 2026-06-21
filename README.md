@@ -11,7 +11,7 @@
 ![Self-hosted](https://img.shields.io/badge/self--hosted-%E2%9C%93-success)
 ![UI](https://img.shields.io/badge/UI-EN%20%2F%20DE-informational)
 
-**🇩🇪 Deutsch** · [🇬🇧 English](README.en.md)
+**🇩🇪 Deutsch** · [🇬🇧 English](README.en.md) · [🟥⚫ Baseldütsch](README.bl.md)
 
 </div>
 
@@ -203,7 +203,8 @@ docker compose up -d --build
 ```bash
 python3 -m venv .venv && . .venv/bin/activate
 pip install -r requirements.txt
-python test_scoring.py      # prüft die Wertungs-Engine
+pip install pytest
+python3 -m pytest tests/      # 52 Tests: Wertungs-Engine, Login/Bruteforce/Open-Redirect, Routen
 ```
 
 ---
@@ -212,15 +213,27 @@ python test_scoring.py      # prüft die Wertungs-Engine
 
 ```
 orakel-fc/
-├── app.py                  # komplette App (Modelle, Routen, Wertungs-Engine)
+├── app.py                  # App-Setup: Konfiguration, Extensions, Blueprint-Registrierung
+├── extensions.py           # db, csrf (Flask-Extension-Instanzen)
+├── models.py                # SQLAlchemy-Modelle (Player, Match, Tip, Joker, …)
+├── auth.py                  # Login, Bruteforce-Schutz, Open-Redirect-Schutz, Decorators
+├── scoring.py                # Wertungs-Engine (Punkteberechnung, Tabelle)
+├── settings.py                # Key/Value-Einstellungen (z. B. Nur-Tippspiel-Modus)
+├── security.py                # HTTP-Sicherheitsheader
+├── i18n_helpers.py            # Sprachauswahl-Logik (nutzt i18n.py)
+├── i18n.py                    # Übersetzungstabelle (Deutsch → Englisch)
+├── catalog_config.py          # Gemeinsame Konfiguration für Joker-Effekte & Admin-Kataloge
+├── routes/
+│   ├── public.py            # Routen für Spieler:innen (Tippen, Joker, Tabelle, …)
+│   └── admin.py              # Admin-Routen (Spieler, Spielplan, Kataloge, Anpassungen)
 ├── templates/              # alle HTML-Seiten
 ├── static/style.css        # ORAKEL-Design (dunkel, grün/gold)
+├── tests/                    # pytest-Suite (Wertung, Auth, Routen)
 ├── requirements.txt
 ├── Dockerfile
 ├── docker-compose.yml
 ├── orakel-fc.nginx.conf    # fertiger nginx-Server-Block
-├── .env.example            # Konfig-Vorlage
-└── test_scoring.py         # Test der Punkteberechnung
+└── .env.example            # Konfig-Vorlage
 ```
 
 Viel Spaß – und möge der/die beste Orakel gewinnen. 🏆
