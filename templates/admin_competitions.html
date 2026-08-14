@@ -30,7 +30,7 @@
       <tr>
         <td class="mono muted">{{ c.id }}</td>
         <td><b>{{ c.name }}</b>{% if current and c.id==current.id %}<span class="tag green">{{ t("aktiv") }}</span>{% endif %}
-            <br><span class="small muted">{{ c.matchday_label }} · {{ c.stage_label }}</span></td>
+            <br><span class="small muted">{{ t(c.matchday_label) }} · {{ t(c.stage_label) }}</span></td>
         <td class="small muted">{{ formats.get(c.format, {}).get('label', c.format) }}</td>
         <td class="mono">{{ counts.get(c.id, 0) }}</td>
         <td>{% if not c.active %}<span class="tag muted">{{ t("archiviert") }}</span>{% endif %}</td>

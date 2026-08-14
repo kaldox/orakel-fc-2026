@@ -11,7 +11,7 @@ from models import (Adjustment, Award, Challenge, ChaosEvent, Competition,
                      JokerPlay, JokerType, Match, Membership, Mission,
                      MissionAssignment, Player, Tip)
 from auth import admin_required
-from competitions import FORMAT_PRESETS, require_competition, unique_slug
+from competitions import FORMAT_PRESETS, current_competition, require_competition, unique_slug
 from i18n_helpers import t
 from catalog_config import CATALOGS, coerce
 
@@ -78,9 +78,16 @@ def admin_competitions():
         if action in ("archive", "reactivate"):
             c = db.session.get(Competition, int(request.form["id"]))
             if c:
-                c.active = (action == "reactivate")
-                db.session.commit()
-                flash(t("Turnier archiviert.") if action == "archive" else t("Turnier reaktiviert."), "ok")
+                if action == "archive" and Competition.query.filter(
+                        Competition.active.is_(True), Competition.id != c.id).count() == 0:
+                    # Ohne dieses Verbot koennte man sich komplett aus dem
+                    # Admin-Bereich aussperren: jede Seite (auch diese hier)
+                    # braucht ein erreichbares aktives Turnier.
+                    flash(t("Mindestens ein Turnier muss aktiv bleiben."), "error")
+                else:
+                    c.active = (action == "reactivate")
+                    db.session.commit()
+                    flash(t("Turnier archiviert.") if action == "archive" else t("Turnier reaktiviert."), "ok")
             return redirect(url_for("admin.admin_competitions"))
         oid = request.form.get("id")
         obj = db.session.get(Competition, int(oid)) if oid else None
@@ -110,7 +117,7 @@ def admin_competitions():
     items = Competition.query.order_by(Competition.sort_order, Competition.id).all()
     counts = {c.id: Membership.query.filter_by(competition_id=c.id, plays=True).count() for c in items}
     return render_template("admin_competitions.html", items=items, counts=counts,
-                           formats=FORMAT_PRESETS, current=require_competition())
+                           formats=FORMAT_PRESETS, current=current_competition())
 
 
 @admin_bp.route("/mode", methods=["POST"])

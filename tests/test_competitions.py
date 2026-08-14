@@ -79,6 +79,23 @@ def test_wechsel_zu_turnier_ohne_mitgliedschaft_wird_abgelehnt(app, client, comp
     assert "nicht verfügbar" in r.get_data(as_text=True) or "not available" in r.get_data(as_text=True).lower()
 
 
+def test_letztes_aktives_turnier_kann_nicht_archiviert_werden(admin_login, competition):
+    """Regressionstest: sonst kann man sich komplett aus dem Admin-Bereich
+    aussperren, weil jede Admin-Seite ein erreichbares aktives Turnier
+    braucht - auch die Turnierverwaltung selbst."""
+    csrf = _get_csrf(admin_login, "/admin/wettbewerbe")
+    r = admin_login.post("/admin/wettbewerbe", data={
+        "csrf_token": csrf, "action": "archive", "id": competition.id,
+    }, follow_redirects=True)
+    assert r.status_code == 200
+    html = r.get_data(as_text=True)
+    assert "Mindestens ein Turnier" in html or "must stay active" in html.lower()
+
+    # Turnier ist immer noch aktiv, Admin-Bereich bleibt erreichbar.
+    assert admin_login.get("/admin/wettbewerbe").status_code == 200
+    assert admin_login.get("/admin").status_code == 200
+
+
 def test_migration_backfill_zieht_alte_zeilen_ohne_competition_id_nach(app, competition):
     """Simuliert eine Zeile wie vor dem Umstieg auf Competition (noch ohne
     competition_id) - der naechste Migrationslauf muss sie nachziehen."""

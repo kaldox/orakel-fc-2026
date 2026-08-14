@@ -26,10 +26,10 @@
       {% elif jt.auto_effect == 'sabotage' %}
         <div class="row">
           <div class="field"><label>{{ t("Ziel") }}</label><select name="target_player_id" required><option value="">—</option>{% for o in opponents %}<option value="{{ o.id }}">{{ o.name }}</option>{% endfor %}</select></div>
-          <div class="field"><label>{{ t("Spieltag") }}</label><select name="matchday" required><option value="">—</option>{% for d in matchdays %}<option>{{ d }}</option>{% endfor %}</select></div>
+          <div class="field"><label>{{ t(competition.matchday_label) }}</label><select name="matchday" required><option value="">—</option>{% for d in matchdays %}<option>{{ d }}</option>{% endfor %}</select></div>
         </div>
       {% elif jt.auto_effect in ['triple','shield','lucky'] %}
-        <div class="field"><label>{{ t("Spieltag") }}</label><select name="matchday" required><option value="">—</option>{% for d in matchdays %}<option>{{ d }}</option>{% endfor %}</select></div>
+        <div class="field"><label>{{ t(competition.matchday_label) }}</label><select name="matchday" required><option value="">—</option>{% for d in matchdays %}<option>{{ d }}</option>{% endfor %}</select></div>
       {% else %}
         <div class="field"><label>{{ t("Notiz (optional, für die Spielleitung)") }}</label><input name="note" placeholder="{{ t('z.B. Spiel X, Grund …') }}"></div>
       {% endif %}
@@ -47,7 +47,7 @@
   <div style="padding:7px 6px;border-bottom:1px solid var(--line)">
     <b>{{ jt.emoji if jt }} {{ jt.name if jt }}</b>
     {% if jp.match_id and m_map.get(jp.match_id) %}<span class="small muted">→ {{ m_map[jp.match_id].home }} vs {{ m_map[jp.match_id].away }}</span>
-    {% elif jp.matchday %}<span class="small muted">→ {{ t("Spieltag") }} {{ jp.matchday }}</span>{% endif %}
+    {% elif jp.matchday %}<span class="small muted">→ {{ t(competition.matchday_label) }} {{ jp.matchday }}</span>{% endif %}
   </div>
 {% endfor %}
 </div>

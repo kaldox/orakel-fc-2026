@@ -67,6 +67,9 @@ TR_EN = {
     "Dir wurde noch keine Mission zugewiesen.": "You haven't been assigned a mission yet.",
     "Deine gespielten Joker": "Your played jokers",
     "Spieltag": "Matchday",
+    "Runde": "Round",
+    "Gruppe": "Group",
+    "Ligaphase": "League phase",
     "Noch keinen Joker gespielt.": "No joker played yet.",
     "Joker ansehen →": "View jokers →",
 
@@ -261,8 +264,8 @@ TR_EN = {
     # --- Admin: Anpassungen ---
     "Universeller Bonus/Malus für alles, was nicht automatisch berechnet wird: manuelle Joker-Effekte, Chaos-Strafen, Wett-Einsätze, Kaffeeküchen-Bußen.":
         "Universal bonus/penalty for anything not calculated automatically: manual joker effects, chaos penalties, side bets, kitchen-gossip fines.",
-    "Positive Zahl = Bonus, negative Zahl = Malus (z. B. -4). „Spieltag“ ist optional und nur zur Doku – die Punkte zählen immer zur Gesamtwertung.":
-        "Positive number = bonus, negative number = penalty (e.g. -4). “Matchday” is optional and just for documentation – the points always count toward the total.",
+    "Positive Zahl = Bonus, negative Zahl = Malus (z. B. -4). „{label}“ ist optional und nur zur Doku – die Punkte zählen immer zur Gesamtwertung.":
+        "Positive number = bonus, negative number = penalty (e.g. -4). “{label}” is optional and just for documentation – the points always count toward the total.",
     "Neue Anpassung": "New adjustment",
     "Punkte (±)": "Points (±)",
     "Grund": "Reason",
@@ -378,6 +381,7 @@ TR_EN = {
     "{n} zu '{c}' hinzugefügt.": "{n} added to '{c}'.",
     "Aus '{c}' entfernt.": "Removed from '{c}'.",
     "Turnier archiviert.": "Tournament archived.",
+    "Mindestens ein Turnier muss aktiv bleiben.": "At least one tournament must stay active.",
     "Turnier reaktiviert.": "Tournament reactivated.",
     "Bitte einen Namen für das Turnier angeben.": "Please enter a name for the tournament.",
     "Turnier gespeichert.": "Tournament saved.",

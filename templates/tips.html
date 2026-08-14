@@ -5,7 +5,7 @@
 
 {% for md, ms in groups.items() %}
   <div class="card">
-    <h3>{{ t("Spieltag") }} {{ md }}</h3>
+    <h3>{{ t(competition.matchday_label) }} {{ md }}</h3>
     {% for m in ms %}
       {% set tp = mytips.get(m.id) %}
       <form method="post" id="m{{ m.id }}" class="matchrow {% if m.locked %}locked{% endif %}">

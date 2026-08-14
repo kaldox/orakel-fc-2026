@@ -188,6 +188,12 @@ curl -sI https://orakel.example.com/login | head -1 # HTTP/1.1 200 OK
 > `data/` (die Datenbank) und `.env` liegen nicht im Zip und werden beim Update
 > nie überschrieben. Trotzdem vor größeren Updates ein Backup ziehen (Abschnitt 5).
 
+> **Mehrere Turniere (ab dieser Version):** Der Umstieg auf das neue
+> Competition-Modell läuft beim ersten Start nach dem Update automatisch mit
+> (fehlende Spalten werden ergänzt, ein Default-Turnier aus dem bisherigen
+> `LEAGUE_NAME` angelegt, alle bestehenden Daten dorthin überführt). Kein
+> zusätzliches Migrationsskript nötig – trotzdem gilt: vorher Backup ziehen.
+
 ---
 
 ## 7. Routine-Checks & Fehlersuche

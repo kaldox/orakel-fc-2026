@@ -17,7 +17,7 @@
         <td>{% if j %}{% if j.emoji %}<span class="badge-emoji">{{ j.emoji }}</span> {% endif %}{{ j.name }}{% if j.auto_effect and j.auto_effect != 'manual' %} <span class="tag green">{{ j.auto_effect }}</span>{% else %} <span class="tag muted">{{ t("manuell") }}</span>{% endif %}{% else %}<span class="muted">—</span>{% endif %}</td>
         <td class="small">
           {% if jp.target_player_id %}<span class="muted">{{ t("Ziel:") }}</span> {{ pm.get(jp.target_player_id, '?') }}<br>{% endif %}
-          {% if m %}<span class="muted">{{ t("Spiel:") }}</span> {{ m.home }}–{{ m.away }}{% elif jp.matchday %}<span class="muted">{{ t("Spieltag:") }}</span> {{ jp.matchday }}{% endif %}
+          {% if m %}<span class="muted">{{ t("Spiel:") }}</span> {{ m.home }}–{{ m.away }}{% elif jp.matchday %}<span class="muted">{{ t(competition.matchday_label) }}:</span> {{ jp.matchday }}{% endif %}
         </td>
         <td class="small">{{ jp.note or '—' }}</td>
         <td class="r"><form method="post" onsubmit="return confirm('{{ t('Joker-Eintrag löschen?') }}')">

@@ -72,7 +72,7 @@
           <div style="padding:8px 6px;border-bottom:1px solid var(--line)">
             <b>{{ jt.emoji if jt }} {{ jt.name if jt else '—' }}</b>
             {% if jp.match_id and matches.get(jp.match_id) %}<span class="small muted">→ {{ matches[jp.match_id].home }} vs {{ matches[jp.match_id].away }}</span>{% endif %}
-            {% if jp.matchday and not jp.match_id %}<span class="small muted">→ {{ t("Spieltag") }} {{ jp.matchday }}</span>{% endif %}
+            {% if jp.matchday and not jp.match_id %}<span class="small muted">→ {{ t(competition.matchday_label) }} {{ jp.matchday }}</span>{% endif %}
           </div>
         {% endfor %}
       </div>
