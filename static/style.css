@@ -21,6 +21,9 @@ nav.menu a{color:var(--muted);font-weight:600;font-size:13.5px;padding:6px 11px;
 nav.menu a:hover{color:var(--ink);background:var(--surface);text-decoration:none}
 nav.menu a.admin{color:var(--gold)}
 nav.menu a.logout{color:var(--coral)}
+.comp-tag{display:inline-block;margin-left:8px;font-family:'Hanken Grotesk',sans-serif;font-size:12px;font-weight:700;letter-spacing:0;text-transform:none;color:var(--muted);vertical-align:middle}
+.compsw{margin:0}
+.compsw select{width:auto;padding:6px 10px;font-size:13px;font-weight:600;border-radius:999px;background:var(--surface);border-color:var(--line-2)}
 
 .wrap{max-width:1040px;margin:0 auto;padding:24px 18px 70px}
 h1{font-family:'Anton',sans-serif;font-weight:400;letter-spacing:.5px;font-size:clamp(26px,5vw,40px);margin:0 0 4px;text-transform:uppercase}

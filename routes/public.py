@@ -7,11 +7,11 @@ from flask import (Blueprint, render_template, request, redirect, url_for,
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from extensions import db
-from models import (ChaosEvent, JokerPlay, JokerType, Match, Mission,
-                     MissionAssignment, Player, Tip, Award, Challenge)
+from models import (ChaosEvent, JokerPlay, JokerType, Match, Membership,
+                     Mission, MissionAssignment, Player, Tip, Award, Challenge)
 from auth import (current_player, login_required, _bf_locked, _bf_record,
                   _bf_clear, _safe_next_target)
-from settings import is_simple
+from competitions import require_competition, switch_competition
 from scoring import compute_standings
 from i18n_helpers import t
 from catalog_config import EFFECT_HELP
@@ -45,31 +45,44 @@ def logout():
     return redirect(url_for("public.login"))
 
 
+@public.route("/wettbewerb/wechseln", methods=["POST"])
+@login_required
+def switch_competition_route():
+    cid = request.form.get("competition_id")
+    if cid and switch_competition(int(cid)):
+        flash(t("Turnier gewechselt."), "ok")
+    else:
+        flash(t("Turnier nicht verfügbar."), "error")
+    return redirect(request.referrer or url_for("public.dashboard"))
+
+
 @public.route("/")
 @login_required
 def dashboard():
-    rows = compute_standings()
+    comp = require_competition()
+    rows = compute_standings(comp)
     me = current_player()
     my_mission = None
-    a = MissionAssignment.query.filter_by(player_id=me.id).first()
+    a = MissionAssignment.query.filter_by(competition_id=comp.id, player_id=me.id).first()
     if a:
         my_mission = (db.session.get(Mission, a.mission_id), a)
-    my_jokers = JokerPlay.query.filter_by(player_id=me.id).all()
-    chaos = ChaosEvent.query.filter_by(active=True).all()
+    my_jokers = JokerPlay.query.filter_by(competition_id=comp.id, player_id=me.id).all()
+    chaos = ChaosEvent.query.filter_by(competition_id=comp.id, active=True).all()
     return render_template("dashboard.html", rows=rows, my_mission=my_mission,
                            my_jokers=my_jokers, chaos=chaos,
-                           joker_types={j.id: j for j in JokerType.query.all()},
-                           matches={m.id: m for m in Match.query.all()})
+                           joker_types={j.id: j for j in JokerType.query.filter_by(competition_id=comp.id).all()},
+                           matches={m.id: m for m in Match.query.filter_by(competition_id=comp.id).all()})
 
 
 @public.route("/tips", methods=["GET", "POST"])
 @login_required
 def tips():
+    comp = require_competition()
     me = current_player()
     if request.method == "POST":
         mid = int(request.form["match_id"])
         m = db.session.get(Match, mid)
-        if not m:
+        if not m or m.competition_id != comp.id:
             abort(404)
         if m.locked:
             flash(t("Anpfiff vorbei – dieser Tipp ist gesperrt."), "error")
@@ -88,14 +101,16 @@ def tips():
         if risk:
             for other in Tip.query.filter_by(player_id=me.id, is_risk=True).all():
                 om = db.session.get(Match, other.match_id)
-                if other.id != tp.id and om and om.matchday == m.matchday:
+                if other.id != tp.id and om and om.competition_id == comp.id and om.matchday == m.matchday:
                     other.is_risk = False
         db.session.commit()
         flash(t("Tipp gespeichert."), "ok")
         return redirect(url_for("public.tips") + ("#m%d" % mid))
 
-    all_matches = Match.query.order_by(Match.kickoff, Match.id).all()
-    mytips = {tp.match_id: tp for tp in Tip.query.filter_by(player_id=me.id).all()}
+    all_matches = Match.query.filter_by(competition_id=comp.id).order_by(Match.kickoff, Match.id).all()
+    match_ids = [m.id for m in all_matches]
+    mytips = {tp.match_id: tp for tp in (Tip.query.filter(Tip.player_id == me.id,
+                                          Tip.match_id.in_(match_ids)).all() if match_ids else [])}
     groups = {}
     for m in all_matches:
         groups.setdefault(m.matchday, []).append(m)
@@ -105,18 +120,19 @@ def tips():
 @public.route("/jokers", methods=["GET", "POST"])
 @login_required
 def jokers():
-    if is_simple():
+    comp = require_competition()
+    if comp.simple_mode:
         return redirect(url_for("public.dashboard"))
     me = current_player()
     if request.method == "POST":
         jt = db.session.get(JokerType, int(request.form["joker_type_id"]))
-        if not jt or not jt.active:
+        if not jt or not jt.active or jt.competition_id != comp.id:
             abort(404)
         used = JokerPlay.query.filter_by(player_id=me.id, joker_type_id=jt.id).count()
         if used >= jt.max_per_player:
             flash(t("Joker '{n}' ist aufgebraucht.", n=jt.name), "error")
             return redirect(url_for("public.jokers"))
-        play = JokerPlay(player_id=me.id, joker_type_id=jt.id,
+        play = JokerPlay(competition_id=comp.id, player_id=me.id, joker_type_id=jt.id,
                          note=request.form.get("note", "")[:200])
         mid = request.form.get("match_id")
         if mid:
@@ -133,39 +149,44 @@ def jokers():
         flash(t("Joker '{n}' aktiviert.", n=jt.name), "ok")
         return redirect(url_for("public.jokers"))
 
-    types = JokerType.query.filter_by(active=True).order_by(JokerType.id).all()
+    types = JokerType.query.filter_by(active=True, competition_id=comp.id).order_by(JokerType.id).all()
     used = {}
-    for jp in JokerPlay.query.filter_by(player_id=me.id).all():
+    for jp in JokerPlay.query.filter_by(player_id=me.id, competition_id=comp.id).all():
         used[jp.joker_type_id] = used.get(jp.joker_type_id, 0) + 1
-    upcoming = Match.query.filter(Match.kickoff > datetime.now()).order_by(Match.kickoff).all()
-    matchdays = [r[0] for r in db.session.query(Match.matchday).distinct().all()]
-    opponents = Player.query.filter(Player.plays == True, Player.id != me.id).all()
+    upcoming = Match.query.filter(Match.competition_id == comp.id,
+                                  Match.kickoff > datetime.now()).order_by(Match.kickoff).all()
+    matchdays = [r[0] for r in db.session.query(Match.matchday)
+                .filter_by(competition_id=comp.id).distinct().all()]
+    member_ids = [m.player_id for m in Membership.query.filter_by(competition_id=comp.id, plays=True).all()]
+    opponents = Player.query.filter(Player.id.in_(member_ids), Player.id != me.id).all() if member_ids else []
     return render_template("jokers.html", types=types, used=used, upcoming=upcoming,
                            matchdays=sorted(matchdays), opponents=opponents,
-                           myplays=JokerPlay.query.filter_by(player_id=me.id).all(),
-                           jt_map={j.id: j for j in JokerType.query.all()},
-                           m_map={m.id: m for m in Match.query.all()},
+                           myplays=JokerPlay.query.filter_by(player_id=me.id, competition_id=comp.id).all(),
+                           jt_map={j.id: j for j in JokerType.query.filter_by(competition_id=comp.id).all()},
+                           m_map={m.id: m for m in Match.query.filter_by(competition_id=comp.id).all()},
                            help=EFFECT_HELP)
 
 
 @public.route("/missions")
 @login_required
 def missions():
-    if is_simple():
+    comp = require_competition()
+    if comp.simple_mode:
         return redirect(url_for("public.dashboard"))
     me = current_player()
-    a = MissionAssignment.query.filter_by(player_id=me.id).first()
+    a = MissionAssignment.query.filter_by(competition_id=comp.id, player_id=me.id).first()
     mine = (db.session.get(Mission, a.mission_id), a) if a else None
-    catalog = Mission.query.filter_by(active=True).order_by(Mission.id).all()
+    catalog = Mission.query.filter_by(active=True, competition_id=comp.id).order_by(Mission.id).all()
     return render_template("missions.html", mine=mine, catalog=catalog)
 
 
 @public.route("/challenges")
 @login_required
 def challenges():
-    if is_simple():
+    comp = require_competition()
+    if comp.simple_mode:
         return redirect(url_for("public.dashboard"))
-    items = Challenge.query.order_by(Challenge.id).all()
+    items = Challenge.query.filter_by(competition_id=comp.id).order_by(Challenge.id).all()
     return render_template("challenges.html", items=items,
                            pmap={p.id: p.name for p in Player.query.all()})
 
@@ -173,9 +194,10 @@ def challenges():
 @public.route("/awards")
 @login_required
 def awards():
-    if is_simple():
+    comp = require_competition()
+    if comp.simple_mode:
         return redirect(url_for("public.dashboard"))
-    items = Award.query.order_by(Award.id).all()
+    items = Award.query.filter_by(competition_id=comp.id).order_by(Award.id).all()
     return render_template("awards.html", items=items,
                            pmap={p.id: p.name for p in Player.query.all()})
 
@@ -205,7 +227,8 @@ def passwort():
 @public.route("/hilfe")
 @login_required
 def hilfe():
-    jokers_list = JokerType.query.filter_by(active=True).order_by(JokerType.id).all()
+    comp = require_competition()
+    jokers_list = JokerType.query.filter_by(active=True, competition_id=comp.id).order_by(JokerType.id).all()
     return render_template("hilfe.html", jokers=jokers_list, help=EFFECT_HELP)
 
 

@@ -16,8 +16,3 @@ def set_setting(key, value):
     else:
         db.session.add(Setting(key=key, value=value))
     db.session.commit()
-
-
-def is_simple():
-    """True = 'Nur Tippspiel' (Joker/Missionen/Challenges/Awards/Chaos aus)."""
-    return get_setting("simple_mode", "0") == "1"

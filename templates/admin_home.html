@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block body %}
 <h1>{{ t("Admin · Spielleitung") }}</h1>
-<p class="sub">{{ t("Hier steuerst du alles. Alle Listen sind erweiterbar – einfach neue Einträge anlegen.") }}</p>
+<p class="sub">{{ t("Du verwaltest gerade") }} <b>{{ comp.name }}</b>{% if competition_count > 1 %} · <a href="{{ url_for('admin.admin_competitions') }}">{{ t("Turnier wechseln/anlegen") }}</a>{% endif %}. {{ t("Alle Listen sind erweiterbar – einfach neue Einträge anlegen.") }}</p>
 <div class="card">
   <h3>{{ t("Spielmodus") }}</h3>
   {% if simple_mode %}
@@ -29,6 +29,7 @@
 
 <h2>{{ t("Setup & Steuerung") }}</h2>
 <div class="grid g3">
+  <a class="tile" href="{{ url_for('admin.admin_competitions') }}"><p class="nm">🏟️ {{ t("Turniere") }}</p><p class="ds">{{ t("Weitere Turniere/Ligen parallel anlegen oder archivieren.") }}</p></a>
   <a class="tile" href="{{ url_for('admin.admin_players') }}"><p class="nm">👥 {{ t("Spieler") }}</p><p class="ds">{{ t("Mitspielende anlegen, Passwörter setzen.") }}</p></a>
   <a class="tile" href="{{ url_for('admin.admin_matches') }}"><p class="nm">⚽ {{ t("Spiele & Ergebnisse") }}</p><p class="ds">{{ t("Spielplan pflegen, Resultate eintragen, Import.") }}</p></a>
   {% if not simple_mode %}

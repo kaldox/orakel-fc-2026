@@ -11,7 +11,7 @@
 ![Self-hosted](https://img.shields.io/badge/self--hosted-%E2%9C%93-success)
 ![UI](https://img.shields.io/badge/UI-EN%20%2F%20DE-informational)
 
-**🇩🇪 Deutsch** · [🇬🇧 English](README.en.md) · [🟥⚫ Baseldütsch](README.bl.md)
+**🇩🇪 Deutsch** · [🇬🇧 English](README.en.md)
 
 </div>
 
@@ -22,7 +22,8 @@ Mit **Jokern, geheimen Missionen, Challenges, Sonderwertungen und Chaos-Events**
 ## Features
 
 - ⚽ **Tippen** mit Sperre zum Anpfiff, Risiko-Tipp pro Spieltag (×2 / −4)
-- 🏆 **Live-Tabelle** mit deterministischer Wertung (Tendenz/Differenz/Exakt, K.-o.- und Außenseiter-Bonus)
+- 🏟️ **Mehrere Turniere/Ligen parallel** möglich (z. B. Bundesliga + Pokal gleichzeitig) – bei nur einem Turnier bleibt alles wie gewohnt einfach, ohne Umschalter
+- 🏆 **Live-Tabelle** mit deterministischer Wertung (Tendenz/Differenz/Exakt, K.-o.- und Außenseiter-Bonus) – funktioniert für Liga, Pokal, Gruppenphase+K.o. oder Schweizer Modus gleichermaßen
 - 🃏 **Joker** mit automatischen Effekten (Verdoppeln, Sabotage, Schutzschild, Tausch, …) – frei erweiterbar
 - 🔮 **Geheime Missionen**, 🎯 **Wochen-Challenges**, 🏅 **Sonderwertungen**, 🌀 **Chaos-Events** – alles im Browser editierbar
 - 🎚️ **Nur-Tippspiel-Schalter** – blendet alle Extras mit einem Klick aus (klassisches Tippspiel)
@@ -46,6 +47,22 @@ _Lege ein paar Screenshots in `docs/` ab und entkommentiere die Galerie oben –
 Ausführliche Anleitungen stehen im **[Wiki](../../wiki)**: Installation, Betrieb im Internet mit HTTPS, Saison-Ablauf, Wertungsregeln, Backups & Updates sowie eine FAQ.
 
 Ein Helfer-Skript (`wm2026_import.py`) lädt den kompletten WM-2026-Spielplan von [openfootball](https://github.com/openfootball) und erzeugt die Import-Datei.
+
+## Mehrere Turniere/Ligen
+
+ORAKEL FC ist nicht auf die WM festgelegt: Unter **Admin → Turniere** legst du
+beliebig viele Turniere an (z. B. „Bundesliga 25/26“ und „DFB-Pokal“
+gleichzeitig) – jedes mit eigenem Spielplan, eigenen Jokern/Missionen/Awards
+und eigener Tabelle. Ein Format (Liga, Pokal, Gruppenphase+K.o., Schweizer
+Modus) bestimmt nur die Vorbelegung der Spieltag-/Phasen-Bezeichnung, die
+Wertung ist für alle gleich. Spieler:innen haben einen Login und können in
+mehreren Turnieren gleichzeitig mitspielen.
+
+Bei genau **einem** aktiven Turnier (der Normalfall für die meisten
+Freundesrunden) ändert sich an der Bedienung nichts – kein Umschalter, kein
+Extra-Klick. Der Umschalter in der Navigation erscheint erst, sobald ein
+zweites Turnier aktiv ist. Bestehende Installationen werden beim Update
+automatisch in ein Default-Turnier überführt, alle Daten bleiben erhalten.
 
 ---
 

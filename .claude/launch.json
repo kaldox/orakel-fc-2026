@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "orakel-fc-dev",
+      "runtimeExecutable": ".venv/Scripts/python.exe",
+      "runtimeArgs": ["-c", "import os; os.environ.setdefault('SECRET_KEY','dev-only-local-verification-secret-not-for-prod'); os.environ.setdefault('ADMIN_PASSWORD','admin123456'); os.environ.setdefault('ADMIN_NAME','admin'); os.environ.setdefault('COOKIE_SECURE','0'); import app; app.app.run(host='127.0.0.1', port=8090, debug=False)"],
+      "port": 8090
+    }
+  ]
+}

@@ -47,3 +47,29 @@ def admin_login(client):
     """Loggt den Test-Client als den geseedeten Admin ein."""
     client.post("/login", data={"name": "admin", "password": "test-admin-password"})
     return client
+
+
+@pytest.fixture()
+def competition(app):
+    """Die beim Seed automatisch angelegte Default-Competition.
+
+    Kein eigenes app.app_context() hier: der app-Fixture haelt bereits einen
+    Kontext offen (yield liegt innerhalb von "with app.app_context()"), ein
+    zusaetzlicher verschachtelter Kontext wuerde beim Verlassen die Session
+    zuruecksetzen (Flask-SQLAlchemy teardown_appcontext) und das
+    zurueckgegebene Objekt "detached" hinterlassen.
+    """
+    from models import Competition
+    return Competition.query.order_by(Competition.id).first()
+
+
+@pytest.fixture()
+def second_competition(app):
+    """Ein zweites, unabhaengiges Turnier - fuer Isolations-Tests."""
+    from extensions import db
+    from models import Competition
+    c = Competition(slug="second", name="Second Competition",
+                    matchday_label="Spieltag", stage_label="Runde")
+    db.session.add(c)
+    db.session.commit()
+    return c

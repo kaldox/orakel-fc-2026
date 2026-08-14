@@ -11,7 +11,7 @@
 ![Self-hosted](https://img.shields.io/badge/self--hosted-%E2%9C%93-success)
 ![UI](https://img.shields.io/badge/UI-EN%20%2F%20DE-informational)
 
-[🇩🇪 Deutsch](README.md) · **🇬🇧 English** · [🟥⚫ Baseldütsch](README.bl.md)
+[🇩🇪 Deutsch](README.md) · **🇬🇧 English**
 
 </div>
 
@@ -22,7 +22,8 @@
 ## Features
 
 - ⚽ **Predictions** that lock at kickoff, plus one risk pick per matchday (×2 / −4)
-- 🏆 **Live standings** with a deterministic scoring engine (tendency / goal difference / exact, knockout & underdog bonus)
+- 🏟️ **Multiple tournaments/leagues in parallel** (e.g. league + cup at the same time) — with just one tournament, everything stays exactly as simple as before, no switcher shown
+- 🏆 **Live standings** with a deterministic scoring engine (tendency / goal difference / exact, knockout & underdog bonus) — works the same for a league, a cup, group+knockout, or a Swiss-model format
 - 🃏 **Jokers** with automatic effects (double, sabotage, shield, swap, …) — fully extensible
 - 🔮 **Secret missions**, 🎯 **weekly challenges**, 🏅 **awards**, 🌀 **chaos events** — all editable in the admin UI
 - 🎚️ **Plain-mode switch** — hide all the extras with one click for a classic predictions-only game
@@ -46,6 +47,21 @@ _Add a few screenshots to `docs/` and uncomment the gallery above — see the [W
 Full guides live in the **[Wiki](../../wiki)**: installation, running it on the internet with HTTPS, the season workflow, scoring rules, backups & updates, and a FAQ.
 
 A helper script (`wm2026_import.py`) pulls the full WC 2026 fixture list from [openfootball](https://github.com/openfootball) and produces the import file (kickoff times converted to your timezone).
+
+## Multiple tournaments/leagues
+
+ORAKEL FC isn't tied to the World Cup: under **Admin → Tournaments** you can
+create as many tournaments as you like (e.g. "Premier League" and "FA Cup" at
+the same time) — each with its own fixtures, jokers/missions/awards and
+standings. A format (league, cup, group+knockout, Swiss model) only sets the
+default matchday/stage labels; scoring is identical for all of them. Players
+have a single login and can take part in several tournaments at once.
+
+With exactly **one** active tournament (the common case for most groups of
+friends), nothing changes about how the app works — no switcher, no extra
+click. The switcher in the navigation only appears once a second tournament
+is active. Existing installations are migrated to a default tournament
+automatically on the next start, with all data preserved.
 
 ---
 

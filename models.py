@@ -14,12 +14,39 @@ class Player(db.Model):
     name = db.Column(db.String(60), unique=True, nullable=False)
     pw_hash = db.Column(db.String(255), nullable=False)
     is_admin = db.Column(db.Boolean, default=False)
-    plays = db.Column(db.Boolean, default=True)
+    plays = db.Column(db.Boolean, default=True)  # veraltet, ungenutzt seit Membership.plays (Abwaertskompatibilitaet)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+
+class Competition(db.Model):
+    """Ein Turnier/eine Liga (z.B. 'WM 2026', 'Bundesliga 25/26', 'DFB-Pokal').
+    Klammer um Spiele, Kataloge und Anpassungen - erlaubt mehrere parallele
+    Tippspiele in derselben Installation."""
+    id = db.Column(db.Integer, primary_key=True)
+    slug = db.Column(db.String(50), unique=True, nullable=False)
+    name = db.Column(db.String(120), nullable=False)
+    # Nur Vorbelegung/Beschriftung, keine eigene Wertungslogik pro Format.
+    format = db.Column(db.String(20), default="league")  # league | cup | group_knockout | swiss
+    matchday_label = db.Column(db.String(30), default="Spieltag")
+    stage_label = db.Column(db.String(30), default="Phase")
+    simple_mode = db.Column(db.Boolean, default=False)
+    active = db.Column(db.Boolean, default=True)
+    sort_order = db.Column(db.Integer, default=0)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+
+class Membership(db.Model):
+    """Teilnahme eines Spielers an einem Turnier (ersetzt Player.plays)."""
+    id = db.Column(db.Integer, primary_key=True)
+    player_id = db.Column(db.Integer, db.ForeignKey("player.id"), nullable=False)
+    competition_id = db.Column(db.Integer, db.ForeignKey("competition.id"), nullable=False)
+    plays = db.Column(db.Boolean, default=True)
+    __table_args__ = (db.UniqueConstraint("player_id", "competition_id"),)
 
 
 class Match(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    competition_id = db.Column(db.Integer, db.ForeignKey("competition.id"))
     matchday = db.Column(db.String(20), default="1")
     stage = db.Column(db.String(40), default="Gruppe")
     home = db.Column(db.String(60), nullable=False)
@@ -52,6 +79,7 @@ class Tip(db.Model):
 
 class JokerType(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    competition_id = db.Column(db.Integer, db.ForeignKey("competition.id"))
     name = db.Column(db.String(80), nullable=False)
     emoji = db.Column(db.String(8), default="")
     description = db.Column(db.Text, default="")
@@ -62,6 +90,7 @@ class JokerType(db.Model):
 
 class JokerPlay(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    competition_id = db.Column(db.Integer, db.ForeignKey("competition.id"))
     player_id = db.Column(db.Integer, db.ForeignKey("player.id"), nullable=False)
     joker_type_id = db.Column(db.Integer, db.ForeignKey("joker_type.id"), nullable=False)
     match_id = db.Column(db.Integer, db.ForeignKey("match.id"))
@@ -73,6 +102,7 @@ class JokerPlay(db.Model):
 
 class Mission(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    competition_id = db.Column(db.Integer, db.ForeignKey("competition.id"))
     name = db.Column(db.String(80), nullable=False)
     emoji = db.Column(db.String(8), default="")
     description = db.Column(db.Text, default="")
@@ -82,6 +112,7 @@ class Mission(db.Model):
 
 class MissionAssignment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    competition_id = db.Column(db.Integer, db.ForeignKey("competition.id"))
     player_id = db.Column(db.Integer, db.ForeignKey("player.id"), nullable=False)
     mission_id = db.Column(db.Integer, db.ForeignKey("mission.id"), nullable=False)
     completed = db.Column(db.Boolean, default=False)
@@ -89,6 +120,7 @@ class MissionAssignment(db.Model):
 
 class Challenge(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    competition_id = db.Column(db.Integer, db.ForeignKey("competition.id"))
     week = db.Column(db.String(30), default="Woche 1")
     title = db.Column(db.String(120), nullable=False)
     description = db.Column(db.Text, default="")
@@ -99,6 +131,7 @@ class Challenge(db.Model):
 
 class Award(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    competition_id = db.Column(db.Integer, db.ForeignKey("competition.id"))
     name = db.Column(db.String(80), nullable=False)
     emoji = db.Column(db.String(8), default="")
     description = db.Column(db.Text, default="")
@@ -107,6 +140,7 @@ class Award(db.Model):
 
 class ChaosEvent(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    competition_id = db.Column(db.Integer, db.ForeignKey("competition.id"))
     name = db.Column(db.String(80), nullable=False)
     emoji = db.Column(db.String(8), default="")
     description = db.Column(db.Text, default="")
@@ -116,6 +150,7 @@ class ChaosEvent(db.Model):
 
 class Adjustment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    competition_id = db.Column(db.Integer, db.ForeignKey("competition.id"))
     player_id = db.Column(db.Integer, db.ForeignKey("player.id"), nullable=False)
     matchday = db.Column(db.String(20))
     points = db.Column(db.Integer, default=0)

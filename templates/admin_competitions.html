@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block body %}
+<p class="muted small"><a href="{{ url_for('admin.admin_home') }}">← {{ t("Admin") }}</a></p>
+<h1>{{ t("Turniere") }}</h1>
+<p class="sub">{{ t("Mehrere Turniere laufen unabhängig – eigene Spiele, Kataloge und Tabelle. Bei genau einem aktiven Turnier siehst du sonst nirgends einen Umschalter.") }}</p>
+
+<div class="card">
+  <h3>{{ t("Neues Turnier anlegen") }}</h3>
+  <form method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="row">
+      <div class="field"><label>{{ t("Name") }}</label><input name="name" required placeholder="{{ t('z.B. Bundesliga 25/26') }}"></div>
+      <div class="field" style="min-width:220px">
+        <label>{{ t("Format") }}</label>
+        <select name="format">
+          {% for key, f in formats.items() %}<option value="{{ key }}">{{ f.label }}</option>{% endfor %}
+        </select>
+      </div>
+    </div>
+    <p class="muted small">{{ t("Bestimmt nur die Vorbelegung für Spieltag-/Phasen-Bezeichnung – die Wertung (Tendenz/Differenz/Exakt, K.-o.-Bonus) ist für jedes Format gleich.") }}</p>
+    <button class="btn">{{ t("Anlegen") }}</button>
+  </form>
+</div>
+
+<div class="card" style="padding:8px">
+  <table>
+    <thead><tr><th>#</th><th>{{ t("Name") }}</th><th>{{ t("Format") }}</th><th>{{ t("Mitspielende") }}</th><th></th><th class="r">{{ t("Aktionen") }}</th></tr></thead>
+    <tbody>
+    {% for c in items %}
+      <tr>
+        <td class="mono muted">{{ c.id }}</td>
+        <td><b>{{ c.name }}</b>{% if current and c.id==current.id %}<span class="tag green">{{ t("aktiv") }}</span>{% endif %}
+            <br><span class="small muted">{{ c.matchday_label }} · {{ c.stage_label }}</span></td>
+        <td class="small muted">{{ formats.get(c.format, {}).get('label', c.format) }}</td>
+        <td class="mono">{{ counts.get(c.id, 0) }}</td>
+        <td>{% if not c.active %}<span class="tag muted">{{ t("archiviert") }}</span>{% endif %}</td>
+        <td class="r" style="white-space:nowrap">
+          <form method="post" style="display:inline">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="action" value="{{ 'reactivate' if not c.active else 'archive' }}">
+            <input type="hidden" name="id" value="{{ c.id }}">
+            <button class="btn sec sm">{{ t("reaktivieren") if not c.active else t("archivieren") }}</button>
+          </form>
+        </td>
+      </tr>
+    {% endfor %}
+    {% if not items %}<tr><td colspan="6" class="muted small">{{ t("Noch keine Turniere.") }}</td></tr>{% endif %}
+    </tbody>
+  </table>
+</div>
+<p class="muted small">{{ t("Tipp: Kataloge (Joker, Missionen, Challenges, Awards, Chaos-Events) sind pro Turnier leer und im jeweiligen Admin-Bereich frei befüllbar.") }}</p>
+{% endblock %}

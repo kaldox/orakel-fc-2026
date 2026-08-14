@@ -2,6 +2,7 @@
 {% block body %}
 <p class="muted small"><a href="{{ url_for('admin.admin_home') }}">← {{ t("Admin") }}</a></p>
 <h1>{{ t("Spieler") }}</h1>
+<p class="sub">{{ t("Logins sind global – neue Personen spielen sofort in '{c}' mit.", c=comp.name) }}</p>
 <div class="card">
   <h3>{{ t("Neue:n Spieler:in anlegen") }}</h3>
   <form method="post">
@@ -15,14 +16,40 @@
     <button class="btn">{{ t("Anlegen") }}</button>
   </form>
 </div>
+{% if non_members %}
+<div class="card">
+  <h3>{{ t("Bestehende Person zu '{c}' hinzufügen", c=comp.name) }}</h3>
+  <form method="post" class="row" style="align-items:flex-end">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input type="hidden" name="action" value="addmember">
+    <div class="field">
+      <label>{{ t("Person") }}</label>
+      <select name="player_id" required>
+        {% for p in non_members %}<option value="{{ p.id }}">{{ p.name }}</option>{% endfor %}
+      </select>
+    </div>
+    <div class="field" style="flex:0"><button class="btn sec">{{ t("Hinzufügen") }}</button></div>
+  </form>
+</div>
+{% endif %}
 <div class="card" style="padding:8px">
   <table>
-    <thead><tr><th>#</th><th>{{ t("Name") }}</th><th>{{ t("Rolle") }}</th><th class="r"></th></tr></thead>
+    <thead><tr><th>#</th><th>{{ t("Name") }}</th><th>{{ t("Rolle") }}</th><th>{{ t("In '{c}'", c=comp.name) }}</th><th class="r"></th></tr></thead>
     <tbody>
     {% for p in players %}
+      {% set mem = memberships.get(p.id) %}
       <tr><td class="mono muted">{{ p.id }}</td><td><b>{{ p.name }}</b></td>
-        <td>{% if p.is_admin %}<span class="tag gold">{{ t("Admin") }}</span>{% endif %}{% if p.plays %}<span class="tag green">{{ t("spielt") }}</span>{% else %}<span class="tag muted">{{ t("spielt nicht") }}</span>{% endif %}</td>
+        <td>{% if p.is_admin %}<span class="tag gold">{{ t("Admin") }}</span>{% endif %}</td>
+        <td>
+          {% if p.is_admin %}<span class="muted small">–</span>
+          {% elif mem %}<span class="tag green">{{ t("spielt mit") }}</span>
+          {% else %}<span class="tag muted">{{ t("nicht dabei") }}</span>{% endif %}
+        </td>
         <td class="r" style="white-space:nowrap">
+          {% if mem %}
+          <form method="post" style="display:inline" onsubmit="return confirm('{{ t('Aus diesem Turnier entfernen?') }}')">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="action" value="removemember"><input type="hidden" name="membership_id" value="{{ mem.id }}"><button class="btn sec sm">{{ t("entfernen") }}</button></form>
+          {% endif %}
           <form method="post" style="display:inline-flex;gap:4px;vertical-align:middle">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <input type="hidden" name="action" value="resetpw"><input type="hidden" name="id" value="{{ p.id }}">

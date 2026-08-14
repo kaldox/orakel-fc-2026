@@ -369,4 +369,44 @@ TR_EN = {
     "Nur Tippspiel": "Plain prediction game",
     "Auf „Nur Tippspiel“ umstellen": "Switch to plain prediction game",
     "Auf „Voller Modus“ umstellen": "Switch to full mode",
+
+    # --- Mehrere Turniere ---
+    "Du bist noch keinem Turnier zugewiesen. Wende dich an die Spielleitung.":
+        "You're not part of a tournament yet. Ask the organiser.",
+    "Turnier gewechselt.": "Tournament switched.",
+    "Turnier nicht verfügbar.": "Tournament not available.",
+    "{n} zu '{c}' hinzugefügt.": "{n} added to '{c}'.",
+    "Aus '{c}' entfernt.": "Removed from '{c}'.",
+    "Turnier archiviert.": "Tournament archived.",
+    "Turnier reaktiviert.": "Tournament reactivated.",
+    "Bitte einen Namen für das Turnier angeben.": "Please enter a name for the tournament.",
+    "Turnier gespeichert.": "Tournament saved.",
+    "Turniere": "Tournaments",
+    "Turnier": "Tournament",
+    "Mehrere Turniere laufen unabhängig – eigene Spiele, Kataloge und Tabelle. Bei genau einem aktiven Turnier siehst du sonst nirgends einen Umschalter.":
+        "Multiple tournaments run independently – their own matches, catalogs and standings. With exactly one active tournament you won't see a switcher anywhere else.",
+    "Neues Turnier anlegen": "Create new tournament",
+    "Format": "Format",
+    "z.B. Bundesliga 25/26": "e.g. Premier League 25/26",
+    "Bestimmt nur die Vorbelegung für Spieltag-/Phasen-Bezeichnung – die Wertung (Tendenz/Differenz/Exakt, K.-o.-Bonus) ist für jedes Format gleich.":
+        "Only sets the default matchday/stage labels – scoring (outcome/margin/exact, knockout bonus) is identical for every format.",
+    "aktiv": "active",
+    "archiviert": "archived",
+    "reaktivieren": "reactivate",
+    "archivieren": "archive",
+    "Noch keine Turniere.": "No tournaments yet.",
+    "Tipp: Kataloge (Joker, Missionen, Challenges, Awards, Chaos-Events) sind pro Turnier leer und im jeweiligen Admin-Bereich frei befüllbar.":
+        "Tip: catalogs (jokers, missions, challenges, awards, chaos events) start empty per tournament and can be filled in freely in that admin section.",
+    "Du verwaltest gerade": "You're currently managing",
+    "Turnier wechseln/anlegen": "Switch/create tournament",
+    "Weitere Turniere/Ligen parallel anlegen oder archivieren.": "Set up or archive more tournaments/leagues in parallel.",
+    "Logins sind global – neue Personen spielen sofort in '{c}' mit.":
+        "Logins are global – new people immediately join '{c}'.",
+    "Bestehende Person zu '{c}' hinzufügen": "Add an existing person to '{c}'",
+    "Person": "Person",
+    "In '{c}'": "In '{c}'",
+    "spielt mit": "playing",
+    "nicht dabei": "not in this one",
+    "entfernen": "remove",
+    "Aus diesem Turnier entfernen?": "Remove from this tournament?",
 }

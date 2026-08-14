@@ -12,8 +12,8 @@
     <input type="hidden" name="action" value="edit">
     <input type="hidden" name="id" value="{{ edit.id }}">
     <div class="row">
-      <div class="field" style="flex:0;min-width:90px"><label>{{ t("Spieltag") }}</label><input name="matchday" value="{{ edit.matchday }}"></div>
-      <div class="field" style="flex:0;min-width:160px"><label>{{ t("Phase") }}</label><input name="stage" value="{{ edit.stage }}"></div>
+      <div class="field" style="flex:0;min-width:90px"><label>{{ comp.matchday_label }}</label><input name="matchday" value="{{ edit.matchday }}"></div>
+      <div class="field" style="flex:0;min-width:160px"><label>{{ comp.stage_label }}</label><input name="stage" value="{{ edit.stage }}"></div>
       <div class="field"><label>{{ t("Heim") }}</label><input name="home" required value="{{ edit.home }}"></div>
       <div class="field"><label>{{ t("Auswärts") }}</label><input name="away" required value="{{ edit.away }}"></div>
     </div>
@@ -32,8 +32,8 @@
   <form method="post">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <div class="row">
-      <div class="field" style="flex:0;min-width:90px"><label>{{ t("Spieltag") }}</label><input name="matchday" value="1"></div>
-      <div class="field" style="flex:0;min-width:140px"><label>{{ t("Phase") }}</label><input name="stage" value="Gruppe"></div>
+      <div class="field" style="flex:0;min-width:90px"><label>{{ comp.matchday_label }}</label><input name="matchday" value="1"></div>
+      <div class="field" style="flex:0;min-width:140px"><label>{{ comp.stage_label }}</label><input name="stage" value="{{ comp.stage_label }}"></div>
       <div class="field"><label>{{ t("Heim") }}</label><input name="home" required placeholder="{{ t('z.B. Schweiz') }}"></div>
       <div class="field"><label>{{ t("Auswärts") }}</label><input name="away" required placeholder="{{ t('z.B. Brasilien') }}"></div>
     </div>

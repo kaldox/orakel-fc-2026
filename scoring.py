@@ -10,7 +10,7 @@ from math import floor
 
 from extensions import db
 from models import (Adjustment, Challenge, JokerPlay, JokerType, Match,
-                     Mission, MissionAssignment, Player, Tip)
+                     Membership, Mission, MissionAssignment, Player, Tip)
 
 sign = lambda x: (x > 0) - (x < 0)
 
@@ -35,16 +35,23 @@ def base_match_points(tip, match):
     return pts, correct
 
 
-def compute_standings():
-    players = Player.query.filter_by(plays=True).all()
-    matches = {m.id: m for m in Match.query.all()}
+def compute_standings(competition):
+    """Tabelle fuer genau ein Turnier. Alle Abfragen sind auf
+    competition.id gescopt, damit parallele Turniere sich nicht
+    gegenseitig beeinflussen."""
+    cid = competition.id
+    member_ids = [m.player_id for m in Membership.query.filter_by(competition_id=cid, plays=True).all()]
+    players = Player.query.filter(Player.id.in_(member_ids)).all() if member_ids else []
+    matches = {m.id: m for m in Match.query.filter_by(competition_id=cid).all()}
     finished = [m for m in matches.values() if m.has_result]
-    tips = {(t.player_id, t.match_id): t for t in Tip.query.all()}
-    plays = JokerPlay.query.all()
+    match_ids = list(matches.keys())
+    tips = {(t.player_id, t.match_id): t
+            for t in (Tip.query.filter(Tip.match_id.in_(match_ids)).all() if match_ids else [])}
+    plays = JokerPlay.query.filter_by(competition_id=cid).all()
 
     double_at, allin_at, triple_at = {}, {}, set()
     swap_for, sabotaged, shielded, lucky_at = set(), set(), set(), set()
-    effect = {j.id: j.auto_effect for j in JokerType.query.all()}
+    effect = {j.id: j.auto_effect for j in JokerType.query.filter_by(competition_id=cid).all()}
     for p in plays:
         eff = effect.get(p.joker_type_id, "manual")
         if eff == "double" and p.match_id:
@@ -104,15 +111,15 @@ def compute_standings():
             fd[worst_md] = round(sum(vals) / len(vals))
 
     miss = {}
-    for a in MissionAssignment.query.filter_by(completed=True).all():
+    for a in MissionAssignment.query.filter_by(competition_id=cid, completed=True).all():
         m = db.session.get(Mission, a.mission_id)
         if m:
             miss[a.player_id] = miss.get(a.player_id, 0) + m.points
     chal = {}
-    for c in Challenge.query.filter(Challenge.winner_player_id.isnot(None)).all():
+    for c in Challenge.query.filter_by(competition_id=cid).filter(Challenge.winner_player_id.isnot(None)).all():
         chal[c.winner_player_id] = chal.get(c.winner_player_id, 0) + c.points
     adj = {}
-    for a in Adjustment.query.all():
+    for a in Adjustment.query.filter_by(competition_id=cid).all():
         adj[a.player_id] = adj.get(a.player_id, 0) + a.points
 
     for r in rows:
