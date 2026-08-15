@@ -13,6 +13,7 @@ from auth import (current_player, login_required, _bf_locked, _bf_record,
                   _bf_clear, _safe_next_target)
 from competitions import require_competition, switch_competition
 from scoring import compute_standings
+from stats import match_stats
 from i18n_helpers import t
 from catalog_config import EFFECT_HELP
 
@@ -114,7 +115,8 @@ def tips():
     groups = {}
     for m in all_matches:
         groups.setdefault(m.matchday, []).append(m)
-    return render_template("tips.html", groups=groups, mytips=mytips, now=datetime.now())
+    stats = {m.id: match_stats(m, mytips.get(m.id)) for m in all_matches}
+    return render_template("tips.html", groups=groups, mytips=mytips, stats=stats, now=datetime.now())
 
 
 @public.route("/jokers", methods=["GET", "POST"])

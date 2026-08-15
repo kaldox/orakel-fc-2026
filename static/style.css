@@ -130,6 +130,12 @@ label{display:block;font-size:12.5px;color:var(--muted);margin:0 0 4px}
   border-radius:10px;padding:10px 12px;color:var(--muted);font-size:14px}
 .jinfo.show{display:block}
 
+/* Form-Punkte im Tipp-Info-Panel (Sieg/Unentschieden/Niederlage) */
+.formdot{display:inline-block;width:10px;height:10px;border-radius:50%;margin:0 1px;vertical-align:middle}
+.formdot.S{background:var(--green)}
+.formdot.U{background:var(--muted-2)}
+.formdot.N{background:var(--coral)}
+
 /* Tutorial-Overlay */
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.62);backdrop-filter:blur(4px);
   z-index:200;align-items:center;justify-content:center;padding:18px}

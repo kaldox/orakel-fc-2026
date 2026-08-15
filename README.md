@@ -22,6 +22,7 @@ Mit **Jokern, geheimen Missionen, Challenges, Sonderwertungen und Chaos-Events**
 ## Features
 
 - ⚽ **Tippen** mit Sperre zum Anpfiff, Risiko-Tipp pro Spieltag (×2 / −4)
+- 📊 **Info-Panel pro Spiel**: bisherige Form beider Teams, Kopf-an-Kopf-Bilanz und wie die Gruppe tippt – alles aus Turnier-eigenen Daten, keine externe API nötig
 - 🏟️ **Mehrere Turniere/Ligen parallel** möglich (z. B. Bundesliga + Pokal gleichzeitig) – bei nur einem Turnier bleibt alles wie gewohnt einfach, ohne Umschalter
 - 🏆 **Live-Tabelle** mit deterministischer Wertung (Tendenz/Differenz/Exakt, K.-o.- und Außenseiter-Bonus) – funktioniert für Liga, Pokal, Gruppenphase+K.o. oder Schweizer Modus gleichermaßen
 - 🃏 **Joker** mit automatischen Effekten (Verdoppeln, Sabotage, Schutzschild, Tausch, …) – frei erweiterbar
@@ -46,7 +47,7 @@ _Lege ein paar Screenshots in `docs/` ab und entkommentiere die Galerie oben –
 
 Ausführliche Anleitungen stehen im **[Wiki](../../wiki)**: Installation, Betrieb im Internet mit HTTPS, Saison-Ablauf, Wertungsregeln, Backups & Updates sowie eine FAQ.
 
-Ein Helfer-Skript (`wm2026_import.py`) lädt den kompletten WM-2026-Spielplan von [openfootball](https://github.com/openfootball) und erzeugt die Import-Datei.
+Ein Helfer-Skript (`import_helper.py`) lädt Spielpläne von [openfootball](https://github.com/openfootball) und erzeugt die Import-Datei – nicht nur für die WM, sondern auch für EM, Champions League, Europa League und Conference League (`python3 import_helper.py --list` zeigt alle Presets).
 
 ## Mehrere Turniere/Ligen
 
@@ -63,6 +64,11 @@ Freundesrunden) ändert sich an der Bedienung nichts – kein Umschalter, kein
 Extra-Klick. Der Umschalter in der Navigation erscheint erst, sobald ein
 zweites Turnier aktiv ist. Bestehende Installationen werden beim Update
 automatisch in ein Default-Turnier überführt, alle Daten bleiben erhalten.
+
+Spielpläne für WM, EM, Champions League, Europa League und Conference League
+lädt `import_helper.py` direkt von openfootball (siehe unten); für jede
+andere Liga/jeden anderen Pokal reicht der bereits eingebaute generische
+JSON-Import unter *Admin → Spiele*.
 
 ---
 
@@ -144,7 +150,13 @@ Unter *Admin → Spiele* eine Liste einfügen:
   {"home":"Kanada","away":"Schweiz","kickoff":"2026-06-12T21:00","matchday":"1","stage":"Gruppe B","knockout":false}
 ]
 ```
-Pflichtfelder: `home`, `away`, `kickoff` (`YYYY-MM-DDTHH:MM`). Optional: `matchday`, `stage`, `knockout`. Den WM-2026-Spielplan bekommst du z. B. kostenlos und ohne API-Key von **openfootball** (github.com/openfootball) und formst ihn einmalig in dieses Format um.
+Pflichtfelder: `home`, `away`, `kickoff` (`YYYY-MM-DDTHH:MM`). Optional: `matchday`, `stage`, `knockout`. Für WM, EM, Champions League, Europa League und Conference League erzeugt `import_helper.py` diese Datei automatisch (siehe oben); für jede andere Liga/jeden anderen Pokal formst du deinen Spielplan einmalig selbst in dieses Format um.
+
+```bash
+python3 import_helper.py --list                                          # verfügbare Turniere
+python3 import_helper.py --competition champions-league --season 2026-27
+python3 import_helper.py --competition euro2028
+```
 
 ---
 
@@ -232,7 +244,8 @@ python3 -m pytest tests/      # 52 Tests: Wertungs-Engine, Login/Bruteforce/Open
 orakel-fc/
 ├── app.py                  # App-Setup: Konfiguration, Extensions, Blueprint-Registrierung
 ├── extensions.py           # db, csrf (Flask-Extension-Instanzen)
-├── models.py                # SQLAlchemy-Modelle (Player, Match, Tip, Joker, …)
+├── models.py                # SQLAlchemy-Modelle (Player, Match, Tip, Joker, Competition, …)
+├── competitions.py          # Turnier-Auswahl (aktuelles Turnier, Umschalter, Mitgliedschaften)
 ├── auth.py                  # Login, Bruteforce-Schutz, Open-Redirect-Schutz, Decorators
 ├── scoring.py                # Wertungs-Engine (Punkteberechnung, Tabelle)
 ├── settings.py                # Key/Value-Einstellungen (z. B. Nur-Tippspiel-Modus)
@@ -245,7 +258,8 @@ orakel-fc/
 │   └── admin.py              # Admin-Routen (Spieler, Spielplan, Kataloge, Anpassungen)
 ├── templates/              # alle HTML-Seiten
 ├── static/style.css        # ORAKEL-Design (dunkel, grün/gold)
-├── tests/                    # pytest-Suite (Wertung, Auth, Routen)
+├── tests/                    # pytest-Suite (Wertung, Auth, Routen, Turniere, Import)
+├── import_helper.py          # Spielplan-Import: WM/EM/Champions League/Europa League/…
 ├── requirements.txt
 ├── Dockerfile
 ├── docker-compose.yml

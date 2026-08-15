@@ -22,6 +22,7 @@
 ## Features
 
 - ⚽ **Predictions** that lock at kickoff, plus one risk pick per matchday (×2 / −4)
+- 📊 **Per-match info panel**: both teams' recent form, head-to-head record, and how the group is predicting — all from the tournament's own data, no external API needed
 - 🏟️ **Multiple tournaments/leagues in parallel** (e.g. league + cup at the same time) — with just one tournament, everything stays exactly as simple as before, no switcher shown
 - 🏆 **Live standings** with a deterministic scoring engine (tendency / goal difference / exact, knockout & underdog bonus) — works the same for a league, a cup, group+knockout, or a Swiss-model format
 - 🃏 **Jokers** with automatic effects (double, sabotage, shield, swap, …) — fully extensible
@@ -46,7 +47,7 @@ _Add a few screenshots to `docs/` and uncomment the gallery above — see the [W
 
 Full guides live in the **[Wiki](../../wiki)**: installation, running it on the internet with HTTPS, the season workflow, scoring rules, backups & updates, and a FAQ.
 
-A helper script (`wm2026_import.py`) pulls the full WC 2026 fixture list from [openfootball](https://github.com/openfootball) and produces the import file (kickoff times converted to your timezone).
+A helper script (`import_helper.py`) pulls fixture lists from [openfootball](https://github.com/openfootball) and produces the import file (kickoff times converted to your timezone) — not just for the World Cup, but also Euro, Champions League, Europa League and Conference League (`python3 import_helper.py --list` shows all presets).
 
 ## Multiple tournaments/leagues
 
@@ -62,6 +63,11 @@ friends), nothing changes about how the app works — no switcher, no extra
 click. The switcher in the navigation only appears once a second tournament
 is active. Existing installations are migrated to a default tournament
 automatically on the next start, with all data preserved.
+
+Fixture lists for the World Cup, Euro, Champions League, Europa League and
+Conference League are pulled straight from openfootball by
+`import_helper.py` (see below); for any other league or cup, the built-in
+generic JSON import under *Admin → Matches* does the job.
 
 ---
 
@@ -126,7 +132,13 @@ Paste a list under *Admin → Matches*:
   {"home":"Canada","away":"Switzerland","kickoff":"2026-06-12T21:00","matchday":"1","stage":"Group B","knockout":false}
 ]
 ```
-Required: `home`, `away`, `kickoff` (`YYYY-MM-DDTHH:MM`). Optional: `matchday`, `stage`, `knockout`. The full WC 2026 fixture list is available for free, no API key needed, from **openfootball** (github.com/openfootball) — convert it into this format once with `wm2026_import.py`.
+Required: `home`, `away`, `kickoff` (`YYYY-MM-DDTHH:MM`). Optional: `matchday`, `stage`, `knockout`. For the World Cup, Euro, Champions League, Europa League and Conference League, `import_helper.py` produces this file automatically (see above); for any other league or cup, convert your own fixture list into this format once.
+
+```bash
+python3 import_helper.py --list                                          # available tournaments
+python3 import_helper.py --competition champions-league --season 2026-27
+python3 import_helper.py --competition euro2028
+```
 
 ## ⭐ Add your own ideas (the whole point)
 
@@ -206,7 +218,8 @@ python3 -m pytest tests/      # 52 tests: scoring engine, login/brute-force/open
 orakel-fc/
 ├── app.py                  # app setup: config, extensions, blueprint registration
 ├── extensions.py           # db, csrf (Flask extension instances)
-├── models.py                # SQLAlchemy models (Player, Match, Tip, Joker, …)
+├── models.py                # SQLAlchemy models (Player, Match, Tip, Joker, Competition, …)
+├── competitions.py          # tournament selection (current tournament, switcher, memberships)
 ├── auth.py                  # login, brute-force protection, open-redirect protection, decorators
 ├── scoring.py                # scoring engine (point calculation, standings)
 ├── settings.py                # key/value settings (e.g. plain-mode switch)
@@ -219,7 +232,8 @@ orakel-fc/
 │   └── admin.py              # admin routes (players, fixtures, catalogs, adjustments)
 ├── templates/              # all HTML pages
 ├── static/style.css        # ORAKEL theme (dark, green/gold)
-├── tests/                    # pytest suite (scoring, auth, routes)
+├── tests/                    # pytest suite (scoring, auth, routes, tournaments, import)
+├── import_helper.py          # fixture import: World Cup/Euro/Champions League/Europa League/…
 ├── requirements.txt
 ├── Dockerfile
 ├── docker-compose.yml

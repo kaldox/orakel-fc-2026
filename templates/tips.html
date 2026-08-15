@@ -8,11 +8,14 @@
     <h3>{{ t(competition.matchday_label) }} {{ md }}</h3>
     {% for m in ms %}
       {% set tp = mytips.get(m.id) %}
+      {% set st = stats.get(m.id) %}
       <form method="post" id="m{{ m.id }}" class="matchrow {% if m.locked %}locked{% endif %}">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <input type="hidden" name="match_id" value="{{ m.id }}">
         <div class="teams">
-          {{ m.home }} <span class="muted">vs</span> {{ m.away }}<br>
+          {{ m.home }} <span class="muted">vs</span> {{ m.away }}
+          {% if st and (st.has_anything or st.group) %}<button class="ibtn" type="button" title="{{ t('Form, Kopf-an-Kopf & Tipp der Gruppe') }}" onclick="toggleInfo('ti{{ m.id }}')" style="margin-left:4px">ℹ️</button>{% endif %}
+          <br>
           <span class="kickoff">{{ m.kickoff.strftime('%d.%m. %H:%M') }} · {{ m.stage }}{% if m.is_knockout %} · {{ t("K.o.") }}{% endif %}</span>
         </div>
         {% if m.has_result %}
@@ -25,6 +28,34 @@
           <input type="checkbox" name="risk" {% if tp and tp.is_risk %}checked{% endif %} {% if m.locked %}disabled{% endif %}> {{ t("Risiko") }}
         </label>
         {% if not m.locked %}<button class="btn sm">{{ t("Speichern") }}</button>{% else %}<span class="tag muted">{{ t("gesperrt") }}</span>{% endif %}
+        {% if st and (st.has_anything or st.group) %}
+        <div class="jinfo" id="ti{{ m.id }}" style="flex-basis:100%">
+          {% if st.home_form or st.away_form %}
+          {% set form_label = {"S": t("Sieg"), "U": t("Unentschieden"), "N": t("Niederlage")} %}
+          <p class="small" style="margin:0 0 4px">
+            <b>{{ t("Form") }}</b> ({{ t("neuestes zuerst") }}):
+            {{ m.home }} {% for r in st.home_form %}<span class="formdot {{ r }}" title="{{ form_label[r] }}"></span>{% else %}<span class="muted">–</span>{% endfor %}
+            · {{ m.away }} {% for r in st.away_form %}<span class="formdot {{ r }}" title="{{ form_label[r] }}"></span>{% else %}<span class="muted">–</span>{% endfor %}
+          </p>
+          {% endif %}
+          {% if st.h2h %}
+          <p class="small" style="margin:0 0 4px"><b>{{ t("Bisherige Duelle in diesem Turnier") }}:</b>
+            {% for h in st.h2h %}{{ h.kickoff.strftime('%d.%m.') }} {{ h.home }} {{ h.home_goals }}:{{ h.away_goals }} {{ h.away }}{% if not loop.last %} · {% endif %}{% endfor %}
+          </p>
+          {% endif %}
+          <p class="small muted" style="margin:0">
+            <b>{{ t("Tipp der Gruppe") }}:</b>
+            {% if st.group %}
+              {{ st.group.home_pct }}% {{ t("Heim") }} · {{ st.group.draw_pct }}% {{ t("Remis") }} · {{ st.group.away_pct }}% {{ t("Auswärts") }}
+              ({{ st.group.total }} {{ t("Tipps") }})
+            {% elif m.locked %}
+              {{ t("Noch keine Tipps abgegeben.") }}
+            {% else %}
+              {{ t("Sichtbar, sobald du selbst getippt hast oder nach Anpfiff.") }}
+            {% endif %}
+          </p>
+        </div>
+        {% endif %}
       </form>
     {% endfor %}
   </div>
