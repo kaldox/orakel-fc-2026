@@ -1,8 +1,8 @@
 <div align="center">
 
-# ORAKEL FC 2026 ⚽🔮
+# ORAKEL FC ⚽🔮
 
-**Dein selbst gehostetes WM-2026-Tippspiel für die Freundesrunde.**
+**Dein selbst gehostetes Tippspiel für die Freundesrunde – WM, EM, Bundesliga, Champions League und mehr, auch parallel.**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 ![Python](https://img.shields.io/badge/Python-3.12-blue?logo=python&logoColor=white)

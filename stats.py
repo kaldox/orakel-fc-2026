@@ -75,11 +75,72 @@ def tip_distribution(match_id):
     }
 
 
+# ---------------------------------------------------------------------------
+# Tipp-Vorschlag: eine grobe, transparente Einschaetzung aus Form + Kopf-an-
+# Kopf-Bilanz - bewusst simpel und nachvollziehbar statt "smart", damit die
+# Begruendung in einem Satz erklaerbar bleibt. Keine externen Daten, keine
+# Erfolgsgarantie - siehe Hinweistext im Panel.
+# ---------------------------------------------------------------------------
+_FORM_POINTS = {"S": 3, "U": 1, "N": 0}
+
+# (Punktedifferenz-Schwelle, Score-Vorschlag, Tendenz)
+_SCORE_TIERS = [
+    (1.3, "2:0", "home"), (0.4, "2:1", "home"),
+    (-0.4, "1:1", "draw"),
+    (-1.3, "1:2", "away"), (float("-inf"), "0:2", "away"),
+]
+
+
+def _avg_points(form):
+    return sum(_FORM_POINTS[r] for r in form) / len(form) if form else None
+
+
+def _h2h_tally(h2h, home_name):
+    """Bisherige Duelle aus Sicht von home_name: (Siege, Remis, Niederlagen)."""
+    w = d = l = 0
+    for m in h2h:
+        if m.home_goals == m.away_goals:
+            d += 1
+            continue
+        winner = m.home if m.home_goals > m.away_goals else m.away
+        if winner == home_name:
+            w += 1
+        else:
+            l += 1
+    return w, d, l
+
+
+def recommend_tip(match, home_form, away_form, h2h):
+    """Score-Vorschlag + Begruendung aus Form-Punkten (S=3/U=1/N=0 je
+    Spiel) der letzten Spiele, mit Kopf-an-Kopf als Zuengelchen bei knappem
+    Formvergleich. None, wenn es noch gar keine Datenbasis gibt (z.B. ganz
+    zu Turnierbeginn)."""
+    if not home_form and not away_form and not h2h:
+        return None
+    home_avg, away_avg = _avg_points(home_form), _avg_points(away_form)
+    diff = (home_avg if home_avg is not None else 1.0) - (away_avg if away_avg is not None else 1.0)
+
+    h2h_w, h2h_d, h2h_l = _h2h_tally(h2h, match.home)
+    if abs(diff) < 0.3 and h2h_w != h2h_l:
+        diff += 0.4 if h2h_w > h2h_l else -0.4
+
+    score, tendency = next((s, tend) for threshold, s, tend in _SCORE_TIERS if diff > threshold)
+
+    return {
+        "score": score, "tendency": tendency,
+        "home_avg": home_avg, "home_games": len(home_form),
+        "away_avg": away_avg, "away_games": len(away_form),
+        "h2h_w": h2h_w, "h2h_d": h2h_d, "h2h_l": h2h_l, "h2h_games": len(h2h),
+    }
+
+
 def match_stats(match, my_tip=None):
-    """Buendelt Form, Kopf-an-Kopf und Gruppen-Tipp-Verteilung fuer ein
-    Spiel. Die Gruppen-Verteilung wird nur zurueckgegeben, wenn das Spiel
-    schon gesperrt ist oder my_tip vorliegt - sonst koennte das Einsehen
-    fremder Tendenzen den eigenen Tipp unfair beeinflussen."""
+    """Buendelt Form, Kopf-an-Kopf, Gruppen-Tipp-Verteilung und Tipp-
+    Vorschlag fuer ein Spiel. Die Gruppen-Verteilung wird nur zurueck-
+    gegeben, wenn das Spiel schon gesperrt ist oder my_tip vorliegt - sonst
+    koennte das Einsehen fremder Tendenzen den eigenen Tipp unfair
+    beeinflussen. Der Tipp-Vorschlag beruht dagegen nur auf objektiven
+    Ergebnissen (nicht auf fremden Tipps) und ist deshalb immer sichtbar."""
     home_form = team_form(match.competition_id, match.home, match.kickoff)
     away_form = team_form(match.competition_id, match.away, match.kickoff)
     h2h = head_to_head(match.competition_id, match.home, match.away, match.kickoff)
@@ -87,5 +148,6 @@ def match_stats(match, my_tip=None):
     return {
         "home_form": home_form, "away_form": away_form, "h2h": h2h,
         "group": tip_distribution(match.id) if reveal_group else None,
+        "recommendation": recommend_tip(match, home_form, away_form, h2h),
         "has_anything": bool(home_form or away_form or h2h),
     }

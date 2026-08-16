@@ -14,7 +14,7 @@
         <input type="hidden" name="match_id" value="{{ m.id }}">
         <div class="teams">
           {{ m.home }} <span class="muted">vs</span> {{ m.away }}
-          {% if st and (st.has_anything or st.group) %}<button class="ibtn" type="button" title="{{ t('Form, Kopf-an-Kopf & Tipp der Gruppe') }}" onclick="toggleInfo('ti{{ m.id }}')" style="margin-left:4px">ℹ️</button>{% endif %}
+          {% if st and (st.has_anything or st.group) %}<button class="ibtn" type="button" title="{{ t('Tipp-Vorschlag, Form, Kopf-an-Kopf & Tipp der Gruppe') }}" onclick="toggleInfo('ti{{ m.id }}')" style="margin-left:4px">ℹ️</button>{% endif %}
           <br>
           <span class="kickoff">{{ m.kickoff.strftime('%d.%m. %H:%M') }} · {{ m.stage }}{% if m.is_knockout %} · {{ t("K.o.") }}{% endif %}</span>
         </div>
@@ -30,6 +30,18 @@
         {% if not m.locked %}<button class="btn sm">{{ t("Speichern") }}</button>{% else %}<span class="tag muted">{{ t("gesperrt") }}</span>{% endif %}
         {% if st and (st.has_anything or st.group) %}
         <div class="jinfo" id="ti{{ m.id }}" style="flex-basis:100%">
+          {% if st.recommendation %}
+          {% set rec = st.recommendation %}
+          <p class="small" style="margin:0 0 8px">
+            <span class="tag gold">{{ t("Tipp-Vorschlag") }}: {{ rec.score }}</span><br>
+            <span class="muted">
+              {% if rec.home_avg is not none %}{{ m.home }}: {{ "%.1f"|format(rec.home_avg) }} {{ t("Punkte/Spiel (letzte {n})", n=rec.home_games) }}{% endif -%}
+              {%- if rec.away_avg is not none %} · {{ m.away }}: {{ "%.1f"|format(rec.away_avg) }} {{ t("Punkte/Spiel (letzte {n})", n=rec.away_games) }}{% endif -%}
+              {%- if rec.h2h_games %} · {{ t("Duelle {w}-{d}-{l} (aus Sicht {home})", w=rec.h2h_w, d=rec.h2h_d, l=rec.h2h_l, home=m.home) }}{% endif %}
+            </span><br>
+            <span class="muted" style="font-style:italic">{{ t("Grobe Einschätzung aus bisherigen Ergebnissen dieses Turniers – keine Erfolgsgarantie.") }}</span>
+          </p>
+          {% endif %}
           {% if st.home_form or st.away_form %}
           {% set form_label = {"S": t("Sieg"), "U": t("Unentschieden"), "N": t("Niederlage")} %}
           <p class="small" style="margin:0 0 4px">

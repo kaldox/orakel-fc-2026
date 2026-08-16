@@ -1,7 +1,7 @@
 {
-  "name": "ORAKEL FC 2026",
+  "name": "ORAKEL FC",
   "short_name": "ORAKEL FC",
-  "description": "WM-2026-Tippspiel mit Jokern, Missionen und Live-Tabelle.",
+  "description": "Selbst gehostetes Tippspiel (WM, EM, Bundesliga, Champions League u.v.m.) mit Jokern, Missionen und Live-Tabelle.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0a0f0d",

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-ORAKEL FC 2026 — selbst gehostetes WM-Tippspiel mit Jokern, Missionen,
+ORAKEL FC — selbst gehostetes Tippspiel (WM, EM, Bundesliga, Champions
+League und mehr - mehrere Turniere parallel möglich) mit Jokern, Missionen,
 Challenges, Sonderwertungen und Chaos-Events.
 
 Diese Datei enthaelt nur noch das App-Setup: Konfiguration, Extension-Init,
@@ -46,7 +47,7 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SESSION_COOKIE_HTTPONLY"] = True
 app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 app.config["SESSION_COOKIE_SECURE"] = os.environ.get("COOKIE_SECURE", "0") == "1"
-LEAGUE_NAME = os.environ.get("LEAGUE_NAME", "ORAKEL FC 2026")
+LEAGUE_NAME = os.environ.get("LEAGUE_NAME", "ORAKEL FC")
 
 db.init_app(app)
 csrf.init_app(app)

@@ -9,7 +9,7 @@ from werkzeug.security import generate_password_hash
 
 from extensions import db
 from models import Match, Player, Tip
-from stats import head_to_head, match_stats, team_form, tip_distribution
+from stats import head_to_head, match_stats, recommend_tip, team_form, tip_distribution
 
 
 def mkplayer(name, competition):
@@ -112,3 +112,71 @@ def test_match_stats_nach_anpfiff_immer_sichtbar(app, competition):
         db.session.commit()
         st = match_stats(past, my_tip=None)  # Betrachter hat selbst nicht getippt
         assert st["group"] is not None  # Spiel ist gesperrt (Anpfiff vorbei) -> trotzdem sichtbar
+
+
+# ── Tipp-Vorschlag ──────────────────────────────────────────────────────
+
+def test_recommend_tip_ohne_datenbasis_liefert_none():
+    # Ganz zu Turnierbeginn: keine Form, kein Kopf-an-Kopf -> kein Vorschlag,
+    # statt eine unbegruendbare Zahl zu erfinden.
+    class Dummy:
+        home, away = "CH", "DE"
+    assert recommend_tip(Dummy(), [], [], []) is None
+
+
+def test_recommend_tip_klar_ueberlegenes_heimteam(app, competition):
+    with app.app_context():
+        # CH: 3 Siege in Folge, DE: 3 Niederlagen in Folge
+        mkmatch(competition, "CH", "X", 3, 0, days_ago=10)
+        mkmatch(competition, "CH", "Y", 2, 0, days_ago=8)
+        mkmatch(competition, "CH", "Z", 1, 0, days_ago=6)
+        mkmatch(competition, "DE", "X", 0, 2, days_ago=9)
+        mkmatch(competition, "DE", "Y", 0, 1, days_ago=7)
+        mkmatch(competition, "DE", "Z", 0, 3, days_ago=5)
+        upcoming = mkmatch(competition, "CH", "DE", None, None, days_ago=-1)
+        upcoming.finished = False
+        db.session.commit()
+
+        home_form = team_form(competition.id, "CH", upcoming.kickoff)
+        away_form = team_form(competition.id, "DE", upcoming.kickoff)
+        h2h = head_to_head(competition.id, "CH", "DE", upcoming.kickoff)
+        rec = recommend_tip(upcoming, home_form, away_form, h2h)
+
+        assert rec["tendency"] == "home"
+        assert rec["home_avg"] == 3.0  # 3 Siege = 3.0 Punkte/Spiel
+        assert rec["away_avg"] == 0.0  # 3 Niederlagen = 0.0 Punkte/Spiel
+        assert rec["home_games"] == 3 and rec["away_games"] == 3
+
+
+def test_recommend_tip_ausgeglichene_form_remis():
+    from stats import recommend_tip
+
+    class Dummy:
+        home, away = "CH", "DE"
+    # Gleiche Form (je 1 Sieg, 1 Niederlage) und keine Kopf-an-Kopf-Historie
+    # -> ausgeglichen, Vorschlag soll auf Remis lauten.
+    rec = recommend_tip(Dummy(), ["S", "N"], ["S", "N"], [])
+    assert rec["tendency"] == "draw"
+    assert rec["score"] == "1:1"
+
+
+def test_recommend_tip_kopf_an_kopf_als_zuenglein_bei_gleicher_form():
+    # Bewusst mit handgebauten Objekten statt DB-Fixtures: team_form() zieht
+    # auch die Kopf-an-Kopf-Spiele selbst mit ein, sobald sie in der DB
+    # stehen - dann waere die "Form" nie wirklich unabhaengig von der
+    # Duell-Historie testbar. Hier bleiben beide bewusst getrennt.
+    class FakeMatch:
+        def __init__(self, home, away, hg, ag):
+            self.home, self.away, self.home_goals, self.away_goals = home, away, hg, ag
+
+    class Dummy:
+        home, away = "DE", "CH"
+
+    # Gleiche Form (je 1 Sieg, 1 Niederlage) fuer beide Teams...
+    home_form, away_form = ["S", "N"], ["S", "N"]
+    # ...aber CH hat die letzten direkten Duelle klar dominiert.
+    h2h = [FakeMatch("CH", "DE", 3, 1), FakeMatch("CH", "DE", 2, 0)]
+    rec = recommend_tip(Dummy(), home_form, away_form, h2h)
+
+    assert rec["h2h_games"] == 2
+    assert rec["tendency"] == "away"  # CH (hier Gast) dominierte die Duelle

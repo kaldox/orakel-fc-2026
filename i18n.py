@@ -415,7 +415,7 @@ TR_EN = {
     "Aus diesem Turnier entfernen?": "Remove from this tournament?",
 
     # --- Tipp-Info-Panel (Form/Kopf-an-Kopf/Gruppentipp) ---
-    "Form, Kopf-an-Kopf & Tipp der Gruppe": "Form, head-to-head & group tips",
+    "Tipp-Vorschlag, Form, Kopf-an-Kopf & Tipp der Gruppe": "Suggested prediction, form, head-to-head & group tips",
     "Form": "Form",
     "neuestes zuerst": "most recent first",
     "Sieg": "Win", "Unentschieden": "Draw", "Niederlage": "Loss",
@@ -425,4 +425,9 @@ TR_EN = {
     "Noch keine Tipps abgegeben.": "No predictions submitted yet.",
     "Sichtbar, sobald du selbst getippt hast oder nach Anpfiff.":
         "Visible once you've submitted your own prediction, or after kickoff.",
+    "Tipp-Vorschlag": "Suggested prediction",
+    "Punkte/Spiel (letzte {n})": "points/game (last {n})",
+    "Duelle {w}-{d}-{l} (aus Sicht {home})": "head-to-head {w}-{d}-{l} (from {home}'s side)",
+    "Grobe Einschätzung aus bisherigen Ergebnissen dieses Turniers – keine Erfolgsgarantie.":
+        "A rough estimate from this tournament's results so far – no guarantee of anything.",
 }
